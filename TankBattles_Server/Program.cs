@@ -26,7 +26,6 @@ app.MapGet("/players",() =>
         message = "all players",
         players
     };
-
 });
 
 app.MapPost("/join/{name}", (string name) => 
