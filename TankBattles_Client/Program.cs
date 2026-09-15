@@ -2,24 +2,38 @@
 using System.Text.Json;
 using var client = new HttpClient();
 
-int playerId = 0;
+
+Console.WriteLine("Enter your name:");
+string playername = Console.ReadLine()!;
+var res = await client.PostAsync($"http://localhost:5062/join/{playername}",null);
+string playersID = await res.Content.ReadAsStringAsync();
+using JsonDocument json1 = JsonDocument.Parse(playersID);
+
+int playerId = json1.RootElement.GetProperty("id").GetInt32();
 Console.WriteLine("press w a s d to move");
 
 while(true)
 {
-    var key = Console.ReadKey(true).Key;
     int x = 0;
     int y = 0;
+    if(Console.KeyAvailable)
+    {
+        ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true); 
+        if(keyInfo.Key == ConsoleKey.W){ y = -1;}
+        if(keyInfo.Key == ConsoleKey.D){ x = 1;}
+        if(keyInfo.Key == ConsoleKey.A){ x = -1;}
+        if(keyInfo.Key == ConsoleKey.S){ y = 1;}
+        if(keyInfo.Key == ConsoleKey.Q){ return;}
+        if(x != 0 || y != 0)
+        {
+        await client.PostAsync($"http://localhost:5062/move/{playerId}/{x}/{y}",null);
+        }
+    }
+    
 
     var response = await client.GetAsync($"http://localhost:5062/players");
     string playersContent = await response.Content.ReadAsStringAsync();
-
-
     using JsonDocument json = JsonDocument.Parse(playersContent);
-    
-
-
-    //Console.WriteLine(playersContent);
     Console.Clear();
 
 
@@ -29,39 +43,9 @@ while(true)
         int playerX = player.GetProperty("x").GetInt32();
         int playerY = player.GetProperty("y").GetInt32();
 
-        // 8. Nueinam į žaidėjo X/Y vietą
         Console.SetCursorPosition(playerX, playerY);
-
-        // 9. Nupiešiam pirmą jo vardo raidę
         Console.Write(name[0]);
     }
-    switch(key)
-    {
-        case ConsoleKey.W:
-        y = -1;
-        break;
-    case ConsoleKey.A:
-        x = -1;
-        break;
-    case ConsoleKey.S:
-        y = 1;
-        break;
-    case ConsoleKey.D:
-        x = 1;
-        break;
-    }
-    await client.PostAsync($"http://localhost:5062/move/{playerId}/{x}/{y}",null);
+    await Task.Delay(10);
 
-//string content = await response.Content.ReadAsStringAsync();
-//Console.WriteLine(content);
-
-//using JsonDocument json = JsonDocument.Parse(content);
-
-//int playerX = json.RootElement.GetProperty("x").GetInt32();
-//int playerY = json.RootElement.GetProperty("y").GetInt32();
-///Console.WriteLine($"Player position: ({playerX}, {playerY})");
-
-//Console.Clear();
-//Console.SetCursorPosition(playerX, playerY);
-//Console.Write("T");
 }

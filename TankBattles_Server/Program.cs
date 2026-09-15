@@ -35,7 +35,8 @@ app.MapPost("/join/{name}", (string name) =>
     return new
     {
         message = "joined " + name,
-        players.Last().Name
+        players.Last().Name,
+        players.Last().ID
     };
 });
 
