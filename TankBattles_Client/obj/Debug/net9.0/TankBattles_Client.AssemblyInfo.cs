@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TankBattles_Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+844ff4eafd81acc50cbef997990a3363460dac10")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9be8702529fe938934d7990cd68f1d30041ffe3e")]
 [assembly: System.Reflection.AssemblyProductAttribute("TankBattles_Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TankBattles_Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
