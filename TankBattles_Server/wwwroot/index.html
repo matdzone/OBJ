@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tank Battles</title>
+
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+	<div class="container">
+
+		<h1>Tank Battles</h1>
+
+		<div id="login">
+			<input id="nameInput"
+				   placeholder="Player name">
+
+			<button id="joinButton">
+				Join game
+			</button>
+		</div>
+
+		<div id="game" class="hidden">
+
+			<div class="hud">
+				<span id="playerName"></span>
+				<span>WASD to move</span>
+			</div>
+
+			<canvas id="gameCanvas"
+					width="800"
+					height="400">
+			</canvas>
+
+		</div>
+
+	</div>
+
+	<script src="app.js"></script>
+
+</body>
+</html>
