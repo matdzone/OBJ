@@ -5,9 +5,17 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+//Iki singleton
+/*
 GameSession game = new GameSession();
 
 Lobby lobby = new Lobby("Main Lobby");
+*/
+
+GameManager gameManager = GameManager.Instance;
+
+GameSession game = gameManager.GameSession;
+Lobby lobby = gameManager.Lobby;
 
 app.MapGet("/api", () =>
 {
