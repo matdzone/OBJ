@@ -28,6 +28,11 @@ async function loadMaze() {
     maze = await response.json();
 }
 const heldKeys = new Set();
+const shellMovementKeys = {
+    "1": "Straight",
+    "2": "Bouncing",
+    "3": "Accelerating"
+};
 let sentDrive = 0;
 let sentTurn = 0;
 document.addEventListener("keydown", async (event) => {
@@ -37,6 +42,13 @@ document.addEventListener("keydown", async (event) => {
     if (key === " ") {
         event.preventDefault();
         await fetch(`${serverUrl}/shoot/${playerId}`, {
+            method: "POST"
+        });
+        return;
+    }
+    const shellMovement = shellMovementKeys[key];
+    if (shellMovement) {
+        await fetch(`${serverUrl}/shell/${playerId}/${shellMovement}`, {
             method: "POST"
         });
         return;
@@ -99,6 +111,13 @@ function drawTank(player, position) {
     context.lineWidth = 3;
     context.stroke();
     context.restore();
+    if (isAlive && player.tank.shield > 0) {
+        context.beginPath();
+        context.arc(centerX, centerY, 12, 0, Math.PI * 2);
+        context.strokeStyle = "rgba(90, 160, 255, 0.8)";
+        context.lineWidth = 2;
+        context.stroke();
+    }
     let labelY = centerY - 14;
     if (!isAlive) {
         drawSkull(centerX, centerY - 18);
@@ -143,14 +162,43 @@ function drawProjectile(projectile, ageSeconds) {
         isRocket ? "#ff7a2f" : "white";
     context.fill();
 }
+const boxStyles = {
+    Rocket: { fill: "#c8913a", stroke: "#7a5520" },
+    Health: { fill: "#e8e8e8", stroke: "#9a9a9a" },
+    Shield: { fill: "#3f7fd6", stroke: "#1f4b8a" }
+};
 function drawBox(box) {
     const x = box.position.x * tileSize;
     const y = box.position.y * tileSize;
-    context.fillStyle = "#c8913a";
+    const centerX = x + tileSize / 2;
+    const centerY = y + tileSize / 2;
+    const style = boxStyles[box.kind] ?? boxStyles.Rocket;
+    context.fillStyle = style.fill;
     context.fillRect(x + 3, y + 3, tileSize - 6, tileSize - 6);
-    context.strokeStyle = "#7a5520";
+    context.strokeStyle = style.stroke;
     context.lineWidth = 2;
     context.strokeRect(x + 3, y + 3, tileSize - 6, tileSize - 6);
+    if (box.kind === "Health") {
+        context.fillStyle = "#d63b3b";
+        context.fillRect(centerX - 1.5, centerY - 5, 3, 10);
+        context.fillRect(centerX - 5, centerY - 1.5, 10, 3);
+    }
+    else if (box.kind === "Shield") {
+        context.beginPath();
+        context.arc(centerX, centerY, 4, 0, Math.PI * 2);
+        context.strokeStyle = "white";
+        context.lineWidth = 1.5;
+        context.stroke();
+    }
+    else {
+        context.beginPath();
+        context.moveTo(centerX + 5, centerY);
+        context.lineTo(centerX - 4, centerY - 3);
+        context.lineTo(centerX - 4, centerY + 3);
+        context.closePath();
+        context.fillStyle = "#6b3a12";
+        context.fill();
+    }
 }
 const renderPositions = new Map();
 let players = [];
@@ -173,6 +221,11 @@ async function updateGame() {
     const me = players.find((player) => player.id === playerId);
     if (me) {
         document.getElementById("weaponName").textContent = me.tank.weapon.name;
+        document.getElementById("shellName").textContent = me.tank.shellMovement;
+        document.getElementById("healthValue").textContent =
+            me.tank.shield > 0
+                ? `${me.tank.health} +${me.tank.shield}`
+                : `${me.tank.health}`;
     }
 }
 function updateRenderPosition(player, deltaSeconds) {

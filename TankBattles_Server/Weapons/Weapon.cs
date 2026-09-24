@@ -19,7 +19,8 @@ public class Weapon
 		double directionX,
 		double directionY,
 		int ownerId,
-		GameSession game)
+		GameSession game,
+		IMovementStrategy shellMovement)
 	{
 		return new Projectile(
 			x,
@@ -27,7 +28,9 @@ public class Weapon
 			directionX * ProjectileSpeed,
 			directionY * ProjectileSpeed,
 			Damage,
-			ownerId
+			ownerId,
+			"Shell",
+			shellMovement
 		);
 	}
 }

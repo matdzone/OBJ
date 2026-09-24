@@ -1,8 +1,10 @@
-public class Box : IPlayerMoveObserver
+public abstract class Box : IPlayerMoveObserver
 {
 	public Position Position { get; }
 
-	public Box(int x, int y)
+	public abstract string Kind { get; }
+
+	protected Box(int x, int y)
 	{
 		Position = new Position(x, y);
 	}
@@ -12,12 +14,16 @@ public class Box : IPlayerMoveObserver
 		if (player.X != Position.X || player.Y != Position.Y)
 			return;
 
-		if (player.Tank.Weapon.IsSingleUse)
+		if (!CanApply(player.Tank))
 			return;
 
 		if (!game.RemoveBox(this))
 			return;
 
-		player.Tank.EquipWeapon(new RocketWeapon());
+		Apply(player.Tank);
 	}
+
+	protected abstract bool CanApply(Tank tank);
+
+	protected abstract void Apply(Tank tank);
 }
