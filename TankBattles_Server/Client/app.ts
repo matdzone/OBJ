@@ -26,14 +26,17 @@ async function joinGame(): Promise<void> {
             "nameInput"
         ) as HTMLInputElement;
 
+        const tankSelect = document.getElementById("tankType") as HTMLSelectElement;
+
+    const tankType = tankSelect.value.trim();
     const name = input.value.trim();
 
-    if (!name)
+    if (!name || !tankType)
         return;
 
     const response =
         await fetch(
-            `${serverUrl}/join/${encodeURIComponent(name)}`,
+            `${serverUrl}/join/${encodeURIComponent(name)}/${encodeURIComponent(tankType)}`,
             {
                 method: "POST"
             });

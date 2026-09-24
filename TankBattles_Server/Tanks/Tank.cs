@@ -1,10 +1,10 @@
 public class Tank
 {
 	public const double Radius = 0.35;
-	public const double Speed = 4.0;
+	public double Speed { get; }
 	public const double TurnSpeed = 180.0;
-	public const int MaxHealth = 100;
-
+	public int MaxHealth { get; }
+	public const double RocketSpeed = 5.0;
 	public static readonly string[] ShellMovements =
 	{
 		"Straight", "Bouncing", "Accelerating"
@@ -33,8 +33,11 @@ public class Tank
 
 	public bool IsAlive => Health > 0;
 
-	public Tank()
+	public Tank(double speed, int maxHealth)
 	{
+		Speed = speed;
+		MaxHealth = maxHealth;
+
 		Health = MaxHealth;
 		Weapon = new Weapon();
 	}

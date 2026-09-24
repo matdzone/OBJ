@@ -3,7 +3,7 @@ public class RocketWeapon : Weapon
 	private static readonly TimeSpan MaxFlightTime =
 		TimeSpan.FromSeconds(5);
 
-	public const double RocketSpeed = Tank.Speed * 1.2;
+	public const double RocketSpeed = 5.0;
 
 	public override bool IsSingleUse => true;
 

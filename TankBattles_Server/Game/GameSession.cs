@@ -29,9 +29,10 @@ public class GameSession
 		}
 	}
 
-	public Player AddPlayer(string name)
+	public Player AddPlayer(string name, ITankFactory factory)
 	{
-		Player player = new Player(_nextPlayerId++, name);
+		Tank tank = factory.CreateTank();
+		Player player = new Player(_nextPlayerId++, name, tank);
 
 		player.Tank.PlaceOnTile(2, 2);
 

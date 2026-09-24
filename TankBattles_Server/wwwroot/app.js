@@ -10,10 +10,12 @@ document
     .addEventListener("click", joinGame);
 async function joinGame() {
     const input = document.getElementById("nameInput");
+    const tankSelect = document.getElementById("tankType");
+    const tankType = tankSelect.value.trim();
     const name = input.value.trim();
-    if (!name)
+    if (!name || !tankType)
         return;
-    const response = await fetch(`${serverUrl}/join/${encodeURIComponent(name)}`, {
+    const response = await fetch(`${serverUrl}/join/${encodeURIComponent(name)}/${encodeURIComponent(tankType)}`, {
         method: "POST"
     });
     const player = await response.json();

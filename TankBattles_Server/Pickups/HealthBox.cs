@@ -11,7 +11,7 @@ public class HealthBox : Box
 
 	protected override bool CanApply(Tank tank)
 	{
-		return tank.Health < Tank.MaxHealth;
+		return tank.Health < tank.MaxHealth;
 	}
 
 	protected override void Apply(Tank tank)

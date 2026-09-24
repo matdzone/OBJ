@@ -12,11 +12,11 @@ public class Player
 	public int Drive { get; private set; }
 	public int Turn { get; private set; }
 
-	public Player(int id, string name)
+	public Player(int id, string name, Tank tank)
 	{
 		ID = id;
 		Name = name;
-		Tank = new Tank();
+		Tank = tank;
 	}
 
 	public void Move(int deltaX, int deltaY)

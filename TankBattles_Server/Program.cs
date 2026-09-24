@@ -16,7 +16,7 @@ GameManager gameManager = GameManager.Instance;
 
 GameSession game = gameManager.GameSession;
 Lobby lobby = gameManager.Lobby;
-
+ITankFactory itank;
 app.MapGet("/api", () =>
 {
 	return "tank battles server!";
@@ -40,9 +40,11 @@ app.MapGet("/players", () =>
 	};
 });
 
-app.MapPost("/join/{name}", (string name) =>
+app.MapPost("/join/{name}/{tankType}", (string name, string tankType) =>
 {
-	Player player = game.AddPlayer(name);
+	if(tankType == "light"){itank = new LightTankFactory();}
+	else {itank = new HeavyTankFactory();}
+	Player player = game.AddPlayer(name, itank);
 
 	lobby.AddPlayer(player);
 
