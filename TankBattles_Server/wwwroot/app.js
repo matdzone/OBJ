@@ -27,37 +27,47 @@ async function loadMaze() {
     const response = await fetch(`${serverUrl}/maze`);
     maze = await response.json();
 }
+const heldKeys = new Set();
+let sentDrive = 0;
+let sentTurn = 0;
 document.addEventListener("keydown", async (event) => {
     if (playerId === null)
         return;
-    let dx = 0;
-    let dy = 0;
-    switch (event.key.toLowerCase()) {
-        case "w":
-            dy = -1;
-            break;
-        case "s":
-            dy = 1;
-            break;
-        case "a":
-            dx = -1;
-            break;
-        case "d":
-            dx = 1;
-            break;
-        case " ":
-            event.preventDefault();
-            await fetch(`${serverUrl}/shoot/${playerId}`, {
-                method: "POST"
-            });
-            return;
-    }
-    if (dx !== 0 || dy !== 0) {
-        await fetch(`${serverUrl}/move/${playerId}/${dx}/${dy}`, {
+    const key = event.key.toLowerCase();
+    if (key === " ") {
+        event.preventDefault();
+        await fetch(`${serverUrl}/shoot/${playerId}`, {
             method: "POST"
         });
+        return;
     }
+    heldKeys.add(key);
+    await sendInput();
 });
+document.addEventListener("keyup", async (event) => {
+    heldKeys.delete(event.key.toLowerCase());
+    await sendInput();
+});
+window.addEventListener("blur", async () => {
+    heldKeys.clear();
+    await sendInput();
+});
+async function sendInput(force = false) {
+    if (playerId === null)
+        return;
+    const drive = (heldKeys.has("w") ? 1 : 0) -
+        (heldKeys.has("s") ? 1 : 0);
+    const turn = (heldKeys.has("d") ? 1 : 0) -
+        (heldKeys.has("a") ? 1 : 0);
+    if (!force && drive === sentDrive && turn === sentTurn)
+        return;
+    sentDrive = drive;
+    sentTurn = turn;
+    await fetch(`${serverUrl}/input/${playerId}/${drive}/${turn}`, {
+        method: "POST"
+    });
+}
+setInterval(() => sendInput(true), 500);
 function drawMaze() {
     if (!maze)
         return;
@@ -66,60 +76,139 @@ function drawMaze() {
         context.fillRect(wall.position.x * tileSize, wall.position.y * tileSize, tileSize, tileSize);
     }
 }
-function drawTank(player) {
-    const x = player.x * tileSize;
-    const y = player.y * tileSize;
-    const centerX = x + tileSize / 2;
-    const centerY = y + tileSize / 2;
-    const tank = player.tank;
+function drawTank(player, position) {
+    const centerX = position.x * tileSize;
+    const centerY = position.y * tileSize;
+    const isAlive = player.tank.isAlive;
+    context.save();
+    context.translate(centerX, centerY);
+    context.rotate(position.angle * Math.PI / 180);
     // Tanko korpusas
-    context.fillStyle = "#3f8f5f";
-    context.fillRect(x + 3, y + 5, tileSize - 6, tileSize - 8);
+    context.fillStyle = isAlive ? "#3f8f5f" : "#3b3530";
+    context.fillRect(-8, -6, 16, 12);
     // Bokštelis
     context.beginPath();
-    context.arc(centerX, centerY, 4, 0, Math.PI * 2);
-    context.fillStyle = "#65b87c";
+    context.arc(0, 0, 4, 0, Math.PI * 2);
+    context.fillStyle = isAlive ? "#65b87c" : "#5a4a3c";
     context.fill();
     // Vamzdis
     context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.lineTo(centerX + tank.directionX * 10, centerY + tank.directionY * 10);
-    context.strokeStyle = "#d4d4d4";
+    context.moveTo(0, 0);
+    context.lineTo(11, 0);
+    context.strokeStyle = isAlive ? "#d4d4d4" : "#6b6b6b";
     context.lineWidth = 3;
     context.stroke();
+    context.restore();
+    let labelY = centerY - 14;
+    if (!isAlive) {
+        drawSkull(centerX, centerY - 18);
+        labelY = centerY - 28;
+    }
     // Savo tankui nicko viršuje nerodom,
     // nes jis jau yra HUD'e
     if (player.id !== playerId) {
         context.fillStyle = "white";
         context.font = "12px Arial";
         context.textAlign = "center";
-        context.fillText(player.name.substring(0, 10), centerX, y - 4);
+        context.fillText(player.name.substring(0, 10), centerX, labelY);
     }
 }
-function drawProjectile(projectile) {
-    const centerX = projectile.position.x * tileSize +
-        tileSize / 2;
-    const centerY = projectile.position.y * tileSize +
-        tileSize / 2;
+function drawSkull(x, y) {
+    context.fillStyle = "#f2f2f2";
     context.beginPath();
-    context.arc(centerX, centerY, 3, 0, Math.PI * 2);
-    context.fillStyle = "white";
+    context.arc(x, y, 6, 0, Math.PI * 2);
+    context.fill();
+    context.fillRect(x - 4, y + 3, 8, 5);
+    context.fillStyle = "#16181d";
+    context.beginPath();
+    context.arc(x - 2.5, y, 1.8, 0, Math.PI * 2);
+    context.arc(x + 2.5, y, 1.8, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.moveTo(x, y + 2);
+    context.lineTo(x - 1, y + 4);
+    context.lineTo(x + 1, y + 4);
+    context.closePath();
+    context.fill();
+    context.fillRect(x - 2, y + 6, 1, 2);
+    context.fillRect(x + 1, y + 6, 1, 2);
+}
+function drawProjectile(projectile, ageSeconds) {
+    const centerX = (projectile.x + projectile.velocityX * ageSeconds) * tileSize;
+    const centerY = (projectile.y + projectile.velocityY * ageSeconds) * tileSize;
+    const isRocket = projectile.kind === "Rocket";
+    context.beginPath();
+    context.arc(centerX, centerY, isRocket ? 5 : 3, 0, Math.PI * 2);
+    context.fillStyle =
+        isRocket ? "#ff7a2f" : "white";
     context.fill();
 }
+function drawBox(box) {
+    const x = box.position.x * tileSize;
+    const y = box.position.y * tileSize;
+    context.fillStyle = "#c8913a";
+    context.fillRect(x + 3, y + 3, tileSize - 6, tileSize - 6);
+    context.strokeStyle = "#7a5520";
+    context.lineWidth = 2;
+    context.strokeRect(x + 3, y + 3, tileSize - 6, tileSize - 6);
+}
+const renderPositions = new Map();
+let players = [];
+let projectiles = [];
+let boxes = [];
+let projectilesReceivedAt = performance.now();
+let lastFrameTime = performance.now();
 async function updateGame() {
     if (playerId === null)
         return;
-    const playersResponse = await fetch(`${serverUrl}/players`);
-    const playersData = await playersResponse.json();
-    const projectileResponse = await fetch(`${serverUrl}/projectiles`);
-    const projectiles = await projectileResponse.json();
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    drawMaze();
-    for (const player of playersData.players) {
-        drawTank(player);
-    }
-    for (const projectile of projectiles) {
-        drawProjectile(projectile);
+    const [playersData, projectileData, boxData] = await Promise.all([
+        fetch(`${serverUrl}/players`).then(r => r.json()),
+        fetch(`${serverUrl}/projectiles`).then(r => r.json()),
+        fetch(`${serverUrl}/boxes`).then(r => r.json())
+    ]);
+    players = playersData.players;
+    projectiles = projectileData;
+    boxes = boxData;
+    projectilesReceivedAt = performance.now();
+    const me = players.find((player) => player.id === playerId);
+    if (me) {
+        document.getElementById("weaponName").textContent = me.tank.weapon.name;
     }
 }
+function updateRenderPosition(player, deltaSeconds) {
+    const tank = player.tank;
+    let position = renderPositions.get(player.id);
+    if (!position ||
+        Math.hypot(position.x - tank.x, position.y - tank.y) > 2) {
+        position = { x: tank.x, y: tank.y, angle: tank.angle };
+        renderPositions.set(player.id, position);
+    }
+    const blend = Math.min(1, deltaSeconds * 15);
+    position.x += (tank.x - position.x) * blend;
+    position.y += (tank.y - position.y) * blend;
+    const angleDifference = ((tank.angle - position.angle) % 360 + 540) % 360 - 180;
+    position.angle += angleDifference * blend;
+    return position;
+}
+function render(time) {
+    const deltaSeconds = Math.min((time - lastFrameTime) / 1000, 0.1);
+    lastFrameTime = time;
+    if (playerId !== null) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawMaze();
+        for (const box of boxes) {
+            drawBox(box);
+        }
+        const sortedPlayers = [...players].sort((a, b) => Number(a.tank.isAlive) - Number(b.tank.isAlive));
+        for (const player of sortedPlayers) {
+            drawTank(player, updateRenderPosition(player, deltaSeconds));
+        }
+        const projectileAge = Math.min((performance.now() - projectilesReceivedAt) / 1000, 0.1);
+        for (const projectile of projectiles) {
+            drawProjectile(projectile, projectileAge);
+        }
+    }
+    requestAnimationFrame(render);
+}
 setInterval(updateGame, 50);
+requestAnimationFrame(render);

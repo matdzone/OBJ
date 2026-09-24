@@ -11,6 +11,19 @@ public class Maze
 		Height = height;
 
 		CreateBorderWalls();
+		CreateInnerWalls();
+	}
+
+	private void CreateInnerWalls()
+	{
+		for (int y = 4; y <= 9; y++)
+			Walls.Add(new Wall(10, y));
+
+		for (int x = 16; x <= 23; x++)
+			Walls.Add(new Wall(x, 14));
+
+		for (int y = 6; y <= 12; y++)
+			Walls.Add(new Wall(29, y));
 	}
 
 	private void CreateBorderWalls()
