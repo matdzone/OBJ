@@ -71,6 +71,16 @@ app.MapPost(
 		});
 });
 
+app.MapPost(
+	"/input/{id}/{drive}/{turn}",
+	(int id, int drive, int turn) =>
+	{
+		if (!game.SetInput(id, drive, turn))
+			return Results.NotFound(new { message = "player " + id + " does not exist" });
+
+		return Results.Ok();
+});
+
 app.MapPost("/shoot/{id}", (int id) =>
 {
 	Projectile? projectile = game.Shoot(id);
@@ -89,6 +99,11 @@ app.MapPost("/shoot/{id}", (int id) =>
 app.MapGet("/projectiles", () =>
 {
 	return game.Projectiles;
+});
+
+app.MapGet("/boxes", () =>
+{
+	return game.Boxes;
 });
 
 app.MapGet("/maze", () =>
@@ -113,11 +128,29 @@ app.MapPost(
 _ = Task.Run(async () =>
 {
 	using PeriodicTimer timer =
-		new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+		new PeriodicTimer(TimeSpan.FromMilliseconds(30));
+
+	System.Diagnostics.Stopwatch stopwatch =
+		System.Diagnostics.Stopwatch.StartNew();
 
 	while (await timer.WaitForNextTickAsync())
 	{
-		game.UpdateProjectiles();
+		double deltaSeconds = stopwatch.Elapsed.TotalSeconds;
+
+		stopwatch.Restart();
+
+		game.Update(Math.Min(deltaSeconds, 0.1));
+	}
+});
+
+_ = Task.Run(async () =>
+{
+	using PeriodicTimer timer =
+		new PeriodicTimer(TimeSpan.FromSeconds(10));
+
+	while (await timer.WaitForNextTickAsync())
+	{
+		game.SpawnBox();
 	}
 });
 
