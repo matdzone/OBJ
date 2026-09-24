@@ -81,6 +81,16 @@ app.MapPost(
 		return Results.Ok();
 });
 
+app.MapPost(
+	"/shell/{id}/{movement}",
+	(int id, string movement) =>
+	{
+		if (!game.SetShellMovement(id, movement))
+			return Results.BadRequest(new { message = "unknown player or movement" });
+
+		return Results.Ok(new { id, movement });
+});
+
 app.MapPost("/shoot/{id}", (int id) =>
 {
 	Projectile? projectile = game.Shoot(id);

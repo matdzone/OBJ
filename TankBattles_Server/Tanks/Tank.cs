@@ -3,6 +3,12 @@ public class Tank
 	public const double Radius = 0.35;
 	public const double Speed = 4.0;
 	public const double TurnSpeed = 180.0;
+	public const int MaxHealth = 100;
+
+	public static readonly string[] ShellMovements =
+	{
+		"Straight", "Bouncing", "Accelerating"
+	};
 
 	public double X { get; private set; }
 	public double Y { get; private set; }
@@ -10,6 +16,10 @@ public class Tank
 	public double Angle { get; private set; }
 
 	public int Health { get; private set; }
+
+	public int Shield { get; private set; }
+
+	public string ShellMovement { get; private set; } = "Straight";
 
 	public Weapon Weapon { get; private set; }
 
@@ -25,7 +35,7 @@ public class Tank
 
 	public Tank()
 	{
-		Health = 100;
+		Health = MaxHealth;
 		Weapon = new Weapon();
 	}
 
@@ -101,6 +111,26 @@ public class Tank
 		Weapon = weapon;
 	}
 
+	public bool SetShellMovement(string movement)
+	{
+		if (!ShellMovements.Contains(movement))
+			return false;
+
+		ShellMovement = movement;
+
+		return true;
+	}
+
+	private IMovementStrategy CreateShellMovement(Maze maze)
+	{
+		return ShellMovement switch
+		{
+			"Bouncing" => new BouncingMovement(maze),
+			"Accelerating" => new AcceleratingMovement(),
+			_ => new StraightMovement()
+		};
+	}
+
 	public Projectile Shoot(int ownerId, GameSession game)
 	{
 		Projectile projectile = Weapon.Shoot(
@@ -109,7 +139,8 @@ public class Tank
 			DirectionX,
 			DirectionY,
 			ownerId,
-			game
+			game,
+			CreateShellMovement(game.Maze)
 		);
 
 		if (Weapon.IsSingleUse)
@@ -118,8 +149,22 @@ public class Tank
 		return projectile;
 	}
 
+	public void Heal(int amount)
+	{
+		Health = Math.Min(MaxHealth, Health + amount);
+	}
+
+	public void AddShield(int amount)
+	{
+		Shield += amount;
+	}
+
 	public void TakeDamage(int damage)
 	{
-		Health = Math.Max(0, Health - damage);
+		int absorbed = Math.Min(Shield, damage);
+
+		Shield -= absorbed;
+
+		Health = Math.Max(0, Health - (damage - absorbed));
 	}
 }

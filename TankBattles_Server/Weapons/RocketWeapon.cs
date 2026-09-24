@@ -18,7 +18,8 @@ public class RocketWeapon : Weapon
 		double directionX,
 		double directionY,
 		int ownerId,
-		GameSession game)
+		GameSession game,
+		IMovementStrategy shellMovement)
 	{
 		Player? target = game.FindNearestEnemy(
 			ownerId,

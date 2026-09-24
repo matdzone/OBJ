@@ -96,7 +96,7 @@ public class GameSession
 				return null;
 
 			_boxes.Add(box);
-			_moveObservers.Add(box);
+			Subscribe(box);
 
 			return box;
 		}
@@ -106,7 +106,7 @@ public class GameSession
 	{
 		lock (_boxLock)
 		{
-			_moveObservers.Remove(box);
+			Unsubscribe(box);
 
 			return _boxes.Remove(box);
 		}
@@ -144,6 +144,16 @@ public class GameSession
 		player.SetInput(drive, turn);
 
 		return true;
+	}
+
+	public bool SetShellMovement(int id, string movement)
+	{
+		Player? player = GetPlayer(id);
+
+		if (player == null)
+			return false;
+
+		return player.Tank.SetShellMovement(movement);
 	}
 
 	public void Update(double deltaSeconds)
