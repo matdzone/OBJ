@@ -8,30 +8,101 @@ body {
 .container {
 	max-width: 900px;
 	margin: 40px auto;
+	padding: 0 20px;
 	text-align: center;
 }
 
+h1 {
+	margin-bottom: 30px;
+}
+
+.panel {
+	max-width: 450px;
+	margin: 0 auto;
+	padding: 25px;
+	background: #22262d;
+	border: 1px solid #3b414b;
+	border-radius: 8px;
+}
+
 input,
+select,
 button {
+	box-sizing: border-box;
 	padding: 10px 14px;
 	font-size: 16px;
+	border-radius: 4px;
+}
+
+input,
+select {
+	margin: 5px;
+	background: #2d323b;
+	color: white;
+	border: 1px solid #555c68;
 }
 
 button {
+	margin: 5px;
 	cursor: pointer;
+	background: #417a50;
+	color: white;
+	border: none;
 }
+
+	button:hover {
+		background: #4d8e5e;
+	}
+
+	button:disabled {
+		cursor: default;
+		opacity: 0.5;
+	}
 
 .hidden {
 	display: none;
 }
 
+#lobbyPlayers {
+	max-width: 320px;
+	margin: 20px auto;
+	padding: 0;
+	list-style: none;
+}
+
+	#lobbyPlayers li {
+		display: flex;
+		justify-content: space-between;
+		margin: 6px 0;
+		padding: 10px;
+		background: #2d323b;
+		border-radius: 4px;
+	}
+
+#hostControls {
+	margin-top: 20px;
+}
+
+#lobbyStatus {
+	margin-top: 20px;
+	color: #b7bdc7;
+}
+
 .hud {
 	display: flex;
 	justify-content: space-between;
+	gap: 10px;
 	margin: 20px 0 10px;
+}
+
+.controls {
+	margin-bottom: 10px;
+	font-size: 14px;
+	color: #b7bdc7;
 }
 
 canvas {
 	background: #252a32;
 	border: 2px solid #555;
+	border-radius: 4px;
 }

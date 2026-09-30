@@ -1,5 +1,8 @@
 public class Player
 {
+	private readonly List<IPlayerMoveObserver> moveObservers =
+		new List<IPlayerMoveObserver>();
+
 	public int ID { get; }
 	public string Name { get; }
 	public Tank Tank { get; }
@@ -22,6 +25,41 @@ public class Player
 	public void Move(int deltaX, int deltaY)
 	{
 		Tank.Move(deltaX, deltaY);
+
+		NotifyMoveObservers();
+	}
+
+	public void AddMoveObserver(IPlayerMoveObserver observer)
+	{
+		if (!moveObservers.Contains(observer))
+		{
+			moveObservers.Add(observer);
+		}
+	}
+
+	public void RemoveMoveObserver(IPlayerMoveObserver observer)
+	{
+		moveObservers.Remove(observer);
+	}
+
+	private void NotifyMoveObservers()
+	{
+		List<IPlayerMoveObserver> currentObservers =
+			new List<IPlayerMoveObserver>(moveObservers);
+
+		foreach (IPlayerMoveObserver observer in currentObservers)
+		{
+			observer.OnPlayerMoved(this);
+		}
+	}
+	public bool Update(double deltaSeconds, Maze maze)
+	{
+		bool moved = Tank.Update(deltaSeconds, Drive, Turn, maze);
+
+		if (moved)
+			NotifyMoveObservers();
+
+		return moved;
 	}
 
 	public void SetInput(int drive, int turn)

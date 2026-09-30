@@ -9,13 +9,17 @@ public abstract class Box : IPlayerMoveObserver
 		Position = new Position(x, y);
 	}
 
-	public void OnPlayerMoved(Player player, GameSession game)
+	public void OnPlayerMoved(Player player)
 	{
 		if (player.X != Position.X || player.Y != Position.Y)
+		{
 			return;
+		}
 
 		if (!CanApply(player.Tank))
 			return;
+
+		GameSession game = GameManager.Instance.GameSession;
 
 		if (!game.RemoveBox(this))
 			return;

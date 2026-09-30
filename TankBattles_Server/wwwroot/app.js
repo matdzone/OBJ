@@ -5,29 +5,167 @@ const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext("2d");
 const tileSize = 20;
 let maze = null;
+let gameActive = false;
+let playerReady = false;
+let lobbyInterval = null;
 document
     .getElementById("joinButton")
     .addEventListener("click", joinGame);
+document
+    .getElementById("readyButton")
+    .addEventListener("click", toggleReady);
+document
+    .getElementById("startGameButton")
+    .addEventListener("click", startLobbyGame);
+document
+    .getElementById("changeGameModeButton")
+    .addEventListener("click", changeGameMode);
 async function joinGame() {
     const input = document.getElementById("nameInput");
     const tankSelect = document.getElementById("tankType");
-    const tankType = tankSelect.value.trim();
     const name = input.value.trim();
+    const tankType = tankSelect.value.trim();
     if (!name || !tankType)
         return;
     const response = await fetch(`${serverUrl}/join/${encodeURIComponent(name)}/${encodeURIComponent(tankType)}`, {
         method: "POST"
     });
+    if (!response.ok)
+        return;
     const player = await response.json();
     playerId = player.id;
-    document.getElementById("playerName").textContent = name;
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("game").classList.remove("hidden");
-    await loadMaze();
+    document
+        .getElementById("playerName")
+        .textContent = name;
+    document
+        .getElementById("lobbyPlayerName")
+        .textContent = name;
+    document
+        .getElementById("login")
+        .classList.add("hidden");
+    document
+        .getElementById("lobby")
+        .classList.remove("hidden");
+    await updateLobby();
+    lobbyInterval =
+        window.setInterval(updateLobby, 500);
+}
+async function toggleReady() {
+    if (playerId === null)
+        return;
+    playerReady = !playerReady;
+    const response = await fetch(`${serverUrl}/ready/${playerId}/${playerReady}`, {
+        method: "POST"
+    });
+    if (!response.ok) {
+        playerReady = !playerReady;
+        return;
+    }
+    updateReadyButton();
+    await updateLobby();
+}
+function updateReadyButton() {
+    const readyButton = document.getElementById("readyButton");
+    readyButton.textContent =
+        playerReady
+            ? "Not ready"
+            : "Ready";
+}
+async function changeGameMode() {
+    if (playerId === null)
+        return;
+    const select = document.getElementById("gameModeSelect");
+    const gameMode = select.value;
+    const response = await fetch(`${serverUrl}/lobby/mode/${playerId}/${encodeURIComponent(gameMode)}`, {
+        method: "POST"
+    });
+    if (!response.ok) {
+        console.log("Could not change game mode");
+        return;
+    }
+    await updateLobby();
+}
+async function startLobbyGame() {
+    if (playerId === null)
+        return;
+    const response = await fetch(`${serverUrl}/lobby/start/${playerId}`, {
+        method: "POST"
+    });
+    if (!response.ok)
+        return;
+    await updateLobby();
+}
+async function updateLobby() {
+    if (playerId === null)
+        return;
+    const response = await fetch(`${serverUrl}/lobby`);
+    if (!response.ok)
+        return;
+    const lobby = await response.json();
+    document
+        .getElementById("gameModeValue")
+        .textContent = lobby.gameMode;
+    const gameModeSelect = document.getElementById("gameModeSelect");
+    gameModeSelect.value =
+        lobby.gameMode;
+    const playerList = document.getElementById("lobbyPlayers");
+    playerList.innerHTML = "";
+    for (const player of lobby.players) {
+        const item = document.createElement("li");
+        const name = document.createElement("span");
+        const status = document.createElement("span");
+        name.textContent =
+            player.id === lobby.hostId
+                ? `${player.name} (Host)`
+                : player.name;
+        status.textContent =
+            player.isReady
+                ? "Ready"
+                : "Not ready";
+        item.appendChild(name);
+        item.appendChild(status);
+        playerList.appendChild(item);
+        if (player.id === playerId) {
+            playerReady = player.isReady;
+            updateReadyButton();
+        }
+    }
+    const isHost = lobby.hostId === playerId;
+    document
+        .getElementById("hostControls")
+        .classList.toggle("hidden", !isHost);
+    const startButton = document.getElementById("startGameButton");
+    startButton.disabled =
+        !lobby.canStart;
+    document
+        .getElementById("lobbyStatus")
+        .textContent =
+        lobby.canStart
+            ? "Ready to start"
+            : `Waiting for ${lobby.requiredPlayers} player(s) and ready status`;
+    if (lobby.isStarted)
+        startGame();
+}
+function startGame() {
+    if (gameActive)
+        return;
+    gameActive = true;
+    if (lobbyInterval !== null) {
+        window.clearInterval(lobbyInterval);
+        lobbyInterval = null;
+    }
+    document
+        .getElementById("lobby")
+        .classList.add("hidden");
+    document
+        .getElementById("game")
+        .classList.remove("hidden");
+    loadMaze();
 }
 async function loadMaze() {
     const response = await fetch(`${serverUrl}/maze`);
-    maze = await response.json();
+    maze =
+        await response.json();
 }
 const heldKeys = new Set();
 const shellMovementKeys = {
@@ -38,7 +176,7 @@ const shellMovementKeys = {
 let sentDrive = 0;
 let sentTurn = 0;
 document.addEventListener("keydown", async (event) => {
-    if (playerId === null)
+    if (playerId === null || !gameActive)
         return;
     const key = event.key.toLowerCase();
     if (key === " ") {
@@ -226,7 +364,7 @@ let boxes = [];
 let projectilesReceivedAt = performance.now();
 let lastFrameTime = performance.now();
 async function updateGame() {
-    if (playerId === null)
+    if (playerId === null || !gameActive)
         return;
     const [playersData, projectileData, boxData] = await Promise.all([
         fetch(`${serverUrl}/players`).then(r => r.json()),
@@ -265,7 +403,7 @@ function updateRenderPosition(player, deltaSeconds) {
 function render(time) {
     const deltaSeconds = Math.min((time - lastFrameTime) / 1000, 0.1);
     lastFrameTime = time;
-    if (playerId !== null) {
+    if (playerId !== null && gameActive) {
         context.clearRect(0, 0, canvas.width, canvas.height);
         drawMaze();
         for (const box of boxes) {

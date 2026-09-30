@@ -8,7 +8,6 @@ public class GameSession
 	private int _nextPlayerId = 0;
 
 	private readonly List<Box> _boxes = new();
-	private readonly List<IPlayerMoveObserver> _moveObservers = new();
 	private readonly BoxFactory _boxFactory = new();
 	private readonly object _boxLock = new();
 	private readonly object _updateLock = new();
@@ -34,14 +33,22 @@ public class GameSession
 		Tank tank = factory.CreateTank();
 		Weapon weapon = factory.CreateWeapon();
 		TankAppearance appearance = factory.CreateAppearance();
+
 		tank.EquipWeapon(weapon);
 		tank.SetAppearance(appearance);
+
 		Player player = new Player(_nextPlayerId++, name, tank);
 
 		player.Tank.PlaceOnTile(2, 2);
 
 		lock (_updateLock)
 			Players.Add(player);
+
+		lock (_boxLock)
+		{
+			foreach (Box box in _boxes)
+				player.AddMoveObserver(box);
+		}
 
 		return player;
 	}
@@ -65,29 +72,6 @@ public class GameSession
 			.FirstOrDefault();
 	}
 
-	public void Subscribe(IPlayerMoveObserver observer)
-	{
-		lock (_boxLock)
-			_moveObservers.Add(observer);
-	}
-
-	public void Unsubscribe(IPlayerMoveObserver observer)
-	{
-		lock (_boxLock)
-			_moveObservers.Remove(observer);
-	}
-
-	private void NotifyPlayerMoved(Player player)
-	{
-		List<IPlayerMoveObserver> observers;
-
-		lock (_boxLock)
-			observers = _moveObservers.ToList();
-
-		foreach (IPlayerMoveObserver observer in observers)
-			observer.OnPlayerMoved(player, this);
-	}
-
 	public Box? SpawnBox()
 	{
 		lock (_boxLock)
@@ -101,7 +85,9 @@ public class GameSession
 				return null;
 
 			_boxes.Add(box);
-			Subscribe(box);
+
+			foreach (Player player in Players)
+				player.AddMoveObserver(box);
 
 			return box;
 		}
@@ -111,9 +97,13 @@ public class GameSession
 	{
 		lock (_boxLock)
 		{
-			Unsubscribe(box);
+			if (!_boxes.Remove(box))
+				return false;
 
-			return _boxes.Remove(box);
+			foreach (Player player in Players)
+				player.RemoveMoveObserver(box);
+
+			return true;
 		}
 	}
 
@@ -135,10 +125,9 @@ public class GameSession
 
 		player.Move(deltaX, deltaY);
 
-		NotifyPlayerMoved(player);
-
 		return true;
 	}
+
 	public bool SetInput(int id, int drive, int turn)
 	{
 		Player? player = GetPlayer(id);
@@ -177,8 +166,7 @@ public class GameSession
 			if (!player.Tank.IsAlive)
 				continue;
 
-			if (player.Tank.Update(deltaSeconds, player.Drive, player.Turn, Maze))
-				NotifyPlayerMoved(player);
+			player.Update(deltaSeconds, Maze);
 		}
 	}
 
@@ -199,6 +187,7 @@ public class GameSession
 			return projectile;
 		}
 	}
+
 	private void UpdateProjectiles(double deltaSeconds)
 	{
 		for (int i = Projectiles.Count - 1; i >= 0; i--)

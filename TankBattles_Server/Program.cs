@@ -55,7 +55,51 @@ app.MapPost("/join/{name}/{tankType}", (string name, string tankType) =>
 		id = player.ID
 	};
 });
+app.MapPost("/lobby/mode/{playerId}/{gameMode}", (int playerId, string gameMode) =>
+{
+	Lobby lobby = GameManager.Instance.Lobby;
 
+	if (lobby.HostId != playerId)
+		return Results.BadRequest(new { message = "Only host can change game mode" });
+
+	if (gameMode != "Deathmatch" && gameMode != "Practice")
+		return Results.BadRequest(new { message = "Unknown game mode" });
+
+	lobby.SetGameMode(gameMode);
+
+	return Results.Ok(new
+	{
+		message = "Game mode changed",
+		gameMode = lobby.GameMode
+	});
+});
+app.MapGet("/lobby", () =>
+{
+	Lobby lobby =
+		GameManager.Instance.Lobby;
+
+	return Results.Ok(new
+	{
+		name = lobby.Name,
+		hostId = lobby.HostId,
+		gameMode = lobby.GameMode,
+		isStarted = lobby.IsStarted,
+		requiredPlayers = lobby.GetRequiredPlayers(),
+		canStart = lobby.CanStartGame(),
+		players = lobby.Players
+	});
+});
+app.MapPost("/lobby/start/{playerId}", (int playerId) =>
+{
+	Lobby lobby = GameManager.Instance.Lobby;
+
+	bool started = lobby.StartGame(playerId);
+
+	if (!started)
+		return Results.BadRequest(new { message = "Game cannot be started" });
+
+	return Results.Ok(new { message = "Game started" });
+});
 app.MapPost(
 	"/move/{id}/{deltaX}/{deltaY}",
 	(int id, int deltaX, int deltaY) =>
