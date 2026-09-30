@@ -16,7 +16,7 @@ public class GameSession
 
 	public GameSession()
 	{
-		Maze = new Maze();
+		Maze = MazeDirector.Classic();
 	}
 
 	public List<Box> Boxes
