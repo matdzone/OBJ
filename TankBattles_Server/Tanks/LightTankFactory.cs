@@ -2,6 +2,14 @@ public class LightTankFactory : ITankFactory
 {
     public Tank CreateTank()
     {
-        return new Tank(6.0, 70);
+        return new LightTank();
+    }
+    public Weapon CreateWeapon()
+    {
+        return new LightWeapon();
+    }
+    public TankAppearance CreateAppearance()
+    {
+        return new LightAppearance();
     }
 }

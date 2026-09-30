@@ -199,30 +199,51 @@ function drawTank(player: any, position: RenderPosition): void {
     const centerY = position.y * tileSize;
 
     const isAlive = player.tank.isAlive;
+    const tankType = player.tank.appearance.type;
 
     context.save();
     context.translate(centerX, centerY);
     context.rotate(position.angle * Math.PI / 180);
 
+
+    let bodyWidth = 16;
+    let bodyHeight = 12;
+    let turretSize = 4;
+    let barrelLength = 11;
+
+    if (tankType === "Heavy") {
+    bodyWidth = 20;
+    bodyHeight = 16;
+    turretSize = 5;
+    barrelLength = 13;
+    }
+
+    else if (tankType === "Light") {
+    bodyWidth = 14;
+    bodyHeight = 10;
+    turretSize = 3;
+    barrelLength = 10;
+    }
+
     // Tanko korpusas
     context.fillStyle = isAlive ? "#3f8f5f" : "#3b3530";
 
     context.fillRect(
-        -8,
-        -6,
-        16,
-        12
+    -bodyWidth / 2,
+    -bodyHeight / 2,
+    bodyWidth,
+    bodyHeight
     );
 
     // Bokštelis
     context.beginPath();
 
     context.arc(
-        0,
-        0,
-        4,
-        0,
-        Math.PI * 2
+    0,
+    0,
+    turretSize,
+    0,
+    Math.PI * 2
     );
 
     context.fillStyle = isAlive ? "#65b87c" : "#5a4a3c";
@@ -232,7 +253,7 @@ function drawTank(player: any, position: RenderPosition): void {
     context.beginPath();
 
     context.moveTo(0, 0);
-    context.lineTo(11, 0);
+    context.lineTo(barrelLength, 0);
 
     context.strokeStyle = isAlive ? "#d4d4d4" : "#6b6b6b";
     context.lineWidth = 3;

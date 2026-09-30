@@ -32,6 +32,10 @@ public class GameSession
 	public Player AddPlayer(string name, ITankFactory factory)
 	{
 		Tank tank = factory.CreateTank();
+		Weapon weapon = factory.CreateWeapon();
+		TankAppearance appearance = factory.CreateAppearance();
+		tank.EquipWeapon(weapon);
+		tank.SetAppearance(appearance);
 		Player player = new Player(_nextPlayerId++, name, tank);
 
 		player.Tank.PlaceOnTile(2, 2);
