@@ -16,18 +16,28 @@ public class Lobby
 
 	public void AddPlayer(Player player)
 	{
-		if (!Players.Any(p => p.ID == player.ID))
-			Players.Add(player);
+		if (Players.Any(p => p.ID == player.ID))
+			return;
+
+		Players.Add(player);
+
+		if (HostId == null)
+			HostId = player.ID;
 	}
 
 	public void RemovePlayer(int playerId)
 	{
-		Players.RemoveAll(p => p.ID == playerId);
-	}
+		Players.RemoveAll(
+			p => p.ID == playerId
+		);
 
-	public void SetHost(int playerId)
-	{
-		HostId = playerId;
+		if (HostId == playerId)
+		{
+			if (Players.Count > 0)
+				HostId = Players[0].ID;
+			else
+				HostId = null;
+		}
 	}
 
 	public void SetGameMode(string gameMode)
@@ -35,8 +45,38 @@ public class Lobby
 		GameMode = gameMode;
 	}
 
-	public void StartGame()
+	public int GetRequiredPlayers()
 	{
+		if (GameMode == "Practice")
+			return 1;
+
+		return 2;
+	}
+
+	public bool CanStartGame()
+	{
+		if (Players.Count < GetRequiredPlayers())
+			return false;
+
+		foreach (Player player in Players)
+		{
+			if (!player.IsReady)
+				return false;
+		}
+
+		return true;
+	}
+
+	public bool StartGame(int playerId)
+	{
+		if (HostId != playerId)
+			return false;
+
+		if (!CanStartGame())
+			return false;
+
 		IsStarted = true;
+
+		return true;
 	}
 }

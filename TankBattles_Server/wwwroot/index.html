@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Tank Battles</title>
-
 	<link rel="stylesheet" href="styles.css">
 </head>
 
@@ -13,28 +13,87 @@
 
 		<h1>Tank Battles</h1>
 
-		<div id="login">
+		<div id="login" class="panel">
+			<h2>Join server</h2>
+
 			<input id="nameInput"
+				   type="text"
 				   placeholder="Player name">
 
 			<select id="tankType">
-    		<option value="light">Light Tank</option>
-    		<option value="heavy">Heavy Tank</option>
+				<option value="light">Light Tank</option>
+				<option value="heavy">Heavy Tank</option>
 			</select>
-			
+
 			<button id="joinButton">
-				Join game
+				Join
 			</button>
 		</div>
+
+
+		<div id="lobby" class="panel hidden">
+			<h2>Main Lobby</h2>
+
+			<p>
+				Player:
+				<strong id="lobbyPlayerName"></strong>
+			</p>
+
+			<p>
+				Game mode:
+				<strong id="gameModeValue">Deathmatch</strong>
+			</p>
+
+			<ul id="lobbyPlayers"></ul>
+
+			<button id="readyButton">
+				Ready
+			</button>
+
+			<div id="hostControls" class="hidden">
+				<select id="gameModeSelect">
+					<option value="Deathmatch">Deathmatch</option>
+					<option value="Practice">Practice</option>
+				</select>
+
+				<button id="changeGameModeButton">
+					Change mode
+				</button>
+
+				<button id="startGameButton">
+					Start game
+				</button>
+			</div>
+
+			<p id="lobbyStatus">
+				Waiting for players...
+			</p>
+		</div>
+
 
 		<div id="game" class="hidden">
 
 			<div class="hud">
 				<span id="playerName"></span>
-				<span>HP: <span id="healthValue">100</span></span>
-				<span>Weapon: <span id="weaponName">Cannon</span></span>
-				<span>Shell: <span id="shellName">Straight</span></span>
-				<span>W/S drive, A/D turn, Space shoot, 1/2/3 shell</span>
+
+				<span>
+					HP:
+					<span id="healthValue">100</span>
+				</span>
+
+				<span>
+					Weapon:
+					<span id="weaponName">Cannon</span>
+				</span>
+
+				<span>
+					Shell:
+					<span id="shellName">Straight</span>
+				</span>
+			</div>
+
+			<div class="controls">
+				W/S drive · A/D turn · Space shoot · 1/2/3 shell
 			</div>
 
 			<canvas id="gameCanvas"
@@ -49,4 +108,5 @@
 	<script src="app.js"></script>
 
 </body>
+
 </html>

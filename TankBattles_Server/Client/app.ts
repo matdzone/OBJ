@@ -13,23 +13,57 @@ const context =
 const tileSize = 20;
 
 let maze: any = null;
+let gameActive = false;
+let playerReady = false;
+let lobbyInterval: number | null = null;
+
+interface LobbyPlayer {
+    id: number;
+    name: string;
+    isReady: boolean;
+}
+
+interface LobbyResponse {
+    name: string;
+    hostId: number | null;
+    gameMode: string;
+    isStarted: boolean;
+    requiredPlayers: number;
+    canStart: boolean;
+    players: LobbyPlayer[];
+}
+
 
 document
     .getElementById("joinButton")!
     .addEventListener("click", joinGame);
 
+document
+    .getElementById("readyButton")!
+    .addEventListener("click", toggleReady);
+
+document
+    .getElementById("startGameButton")!
+    .addEventListener("click", startLobbyGame);
+
+document
+    .getElementById("changeGameModeButton")!
+    .addEventListener("click", changeGameMode);
+
 
 async function joinGame(): Promise<void> {
-
     const input =
         document.getElementById(
             "nameInput"
         ) as HTMLInputElement;
 
-        const tankSelect = document.getElementById("tankType") as HTMLSelectElement;
+    const tankSelect =
+        document.getElementById(
+            "tankType"
+        ) as HTMLSelectElement;
 
-    const tankType = tankSelect.value.trim();
     const name = input.value.trim();
+    const tankType = tankSelect.value.trim();
 
     if (!name || !tankType)
         return;
@@ -39,37 +73,256 @@ async function joinGame(): Promise<void> {
             `${serverUrl}/join/${encodeURIComponent(name)}/${encodeURIComponent(tankType)}`,
             {
                 method: "POST"
-            });
+            }
+        );
+
+    if (!response.ok)
+        return;
 
     const player =
         await response.json();
 
     playerId = player.id;
 
-    document.getElementById(
-        "playerName"
-    )!.textContent = name;
+    document
+        .getElementById("playerName")!
+        .textContent = name;
 
-    document.getElementById(
-        "login"
-    )!.classList.add("hidden");
+    document
+        .getElementById("lobbyPlayerName")!
+        .textContent = name;
 
-    document.getElementById(
-        "game"
-    )!.classList.remove("hidden");
+    document
+        .getElementById("login")!
+        .classList.add("hidden");
 
-    await loadMaze();
+    document
+        .getElementById("lobby")!
+        .classList.remove("hidden");
+
+    await updateLobby();
+
+    lobbyInterval =
+        window.setInterval(
+            updateLobby,
+            500
+        );
+}
+
+
+async function toggleReady(): Promise<void> {
+    if (playerId === null)
+        return;
+
+    playerReady = !playerReady;
+
+    const response =
+        await fetch(
+            `${serverUrl}/ready/${playerId}/${playerReady}`,
+            {
+                method: "POST"
+            }
+        );
+
+    if (!response.ok) {
+        playerReady = !playerReady;
+        return;
+    }
+
+    updateReadyButton();
+
+    await updateLobby();
+}
+
+
+function updateReadyButton(): void {
+    const readyButton =
+        document.getElementById(
+            "readyButton"
+        ) as HTMLButtonElement;
+
+    readyButton.textContent =
+        playerReady
+            ? "Not ready"
+            : "Ready";
+}
+
+
+async function changeGameMode(): Promise<void> {
+    if (playerId === null)
+        return;
+
+    const select =
+        document.getElementById(
+            "gameModeSelect"
+        ) as HTMLSelectElement;
+
+    const gameMode = select.value;
+
+    const response =
+        await fetch(
+            `${serverUrl}/lobby/mode/${playerId}/${encodeURIComponent(gameMode)}`,
+            {
+                method: "POST"
+            }
+        );
+
+    if (!response.ok) {
+        console.log("Could not change game mode");
+        return;
+    }
+
+    await updateLobby();
+}
+
+
+async function startLobbyGame(): Promise<void> {
+    if (playerId === null)
+        return;
+
+    const response =
+        await fetch(
+            `${serverUrl}/lobby/start/${playerId}`,
+            {
+                method: "POST"
+            }
+        );
+
+    if (!response.ok)
+        return;
+
+    await updateLobby();
+}
+
+
+async function updateLobby(): Promise<void> {
+    if (playerId === null)
+        return;
+
+    const response =
+        await fetch(
+            `${serverUrl}/lobby`
+        );
+
+    if (!response.ok)
+        return;
+
+    const lobby: LobbyResponse =
+        await response.json();
+
+    document
+        .getElementById("gameModeValue")!
+        .textContent = lobby.gameMode;
+    const gameModeSelect =
+        document.getElementById(
+            "gameModeSelect"
+        ) as HTMLSelectElement;
+
+    gameModeSelect.value =
+        lobby.gameMode;
+    const playerList =
+        document.getElementById(
+            "lobbyPlayers"
+        ) as HTMLUListElement;
+
+    playerList.innerHTML = "";
+
+    for (const player of lobby.players) {
+        const item =
+            document.createElement("li");
+
+        const name =
+            document.createElement("span");
+
+        const status =
+            document.createElement("span");
+
+        name.textContent =
+            player.id === lobby.hostId
+                ? `${player.name} (Host)`
+                : player.name;
+
+        status.textContent =
+            player.isReady
+                ? "Ready"
+                : "Not ready";
+
+        item.appendChild(name);
+        item.appendChild(status);
+
+        playerList.appendChild(item);
+
+        if (player.id === playerId) {
+            playerReady = player.isReady;
+            updateReadyButton();
+        }
+    }
+
+    const isHost =
+        lobby.hostId === playerId;
+
+    document
+        .getElementById("hostControls")!
+        .classList.toggle(
+            "hidden",
+            !isHost
+        );
+
+    const startButton =
+        document.getElementById(
+            "startGameButton"
+        ) as HTMLButtonElement;
+
+    startButton.disabled =
+        !lobby.canStart;
+
+    document
+        .getElementById("lobbyStatus")!
+        .textContent =
+        lobby.canStart
+            ? "Ready to start"
+            : `Waiting for ${lobby.requiredPlayers} player(s) and ready status`;
+
+    if (lobby.isStarted)
+        startGame();
+}
+
+
+function startGame(): void {
+    if (gameActive)
+        return;
+
+    gameActive = true;
+
+    if (lobbyInterval !== null) {
+        window.clearInterval(
+            lobbyInterval
+        );
+
+        lobbyInterval = null;
+    }
+
+    document
+        .getElementById("lobby")!
+        .classList.add("hidden");
+
+    document
+        .getElementById("game")!
+        .classList.remove("hidden");
+
+    loadMaze();
 }
 
 
 async function loadMaze(): Promise<void> {
-
     const response =
-        await fetch(`${serverUrl}/maze`);
+        await fetch(
+            `${serverUrl}/maze`
+        );
 
-    maze = await response.json();
+    maze =
+        await response.json();
 }
-
 
 const heldKeys = new Set<string>();
 
@@ -86,7 +339,7 @@ let sentTurn = 0;
 document.addEventListener(
     "keydown",
     async event => {
-        if (playerId === null)
+        if (playerId === null || !gameActive)
             return;
 
         const key = event.key.toLowerCase();
@@ -439,7 +692,7 @@ let lastFrameTime = performance.now();
 
 async function updateGame(): Promise<void> {
 
-    if (playerId === null)
+    if (playerId === null || !gameActive)
         return;
 
     const [playersData, projectileData, boxData] =
@@ -516,7 +769,7 @@ function render(time: number): void {
 
     lastFrameTime = time;
 
-    if (playerId !== null) {
+    if (playerId !== null && gameActive) {
 
         context.clearRect(
             0,
