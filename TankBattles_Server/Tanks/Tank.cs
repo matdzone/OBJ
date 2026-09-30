@@ -2,9 +2,10 @@ public class Tank
 {
 	public const double Radius = 0.35;
 	public double Speed { get; }
-	public const double TurnSpeed = 180.0;
+	public  double TurnSpeed {get;}
 	public int MaxHealth { get; }
 	public const double RocketSpeed = 5.0;
+	public TankAppearance? Appearance {get; private set;}
 	public static readonly string[] ShellMovements =
 	{
 		"Straight", "Bouncing", "Accelerating"
@@ -33,11 +34,11 @@ public class Tank
 
 	public bool IsAlive => Health > 0;
 
-	public Tank(double speed, int maxHealth)
+	public Tank(double speed, int maxHealth, double turnspeed)
 	{
 		Speed = speed;
 		MaxHealth = maxHealth;
-
+		TurnSpeed = turnspeed;
 		Health = MaxHealth;
 		Weapon = new Weapon();
 	}
@@ -169,5 +170,9 @@ public class Tank
 		Shield -= absorbed;
 
 		Health = Math.Max(0, Health - (damage - absorbed));
+	}
+	public void SetAppearance(TankAppearance appearance)
+	{
+		Appearance = appearance;
 	}
 }
