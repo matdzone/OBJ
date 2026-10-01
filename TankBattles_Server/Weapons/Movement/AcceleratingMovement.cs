@@ -7,7 +7,12 @@ public class AcceleratingMovement : IMovementStrategy
 	private readonly StraightMovement _straight = new();
 
 	private bool _started;
-
+ 	public IMovementStrategy Clone()
+    {
+        var copy = (AcceleratingMovement)MemberwiseClone();
+        copy._started = false;
+        return copy;
+    }
 	public void Move(Projectile projectile, double deltaSeconds)
 	{
 		double speed = projectile.Speed;

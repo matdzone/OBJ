@@ -3,6 +3,7 @@ public class GameSession
 	public List<Player> Players { get; } = new();
 	public List<Projectile> Projectiles { get; } = new();
 
+	public ShellMovementRegistry ShellMovements { get; }
 	public Maze Maze { get; }
 
 	private int _nextPlayerId = 0;
@@ -12,11 +13,13 @@ public class GameSession
 	private readonly object _boxLock = new();
 	private readonly object _updateLock = new();
 
+
 	private const int MaxBoxes = 2;
 
 	public GameSession()
 	{
 		Maze = MazeDirector.Classic();
+		ShellMovements = new ShellMovementRegistry(Maze);
 	}
 
 	public List<Box> Boxes

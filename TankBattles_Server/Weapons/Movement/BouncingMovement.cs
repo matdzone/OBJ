@@ -1,10 +1,18 @@
 public class BouncingMovement : IMovementStrategy
 {
+	
 	public const int MaxBounces = 3;
 
 	private readonly Maze _maze;
 
 	private int _bounces;
+
+	public IMovementStrategy Clone()
+    {
+        var copy = (BouncingMovement)MemberwiseClone();
+        copy._bounces = 0;   // each shell counts its own bounces
+        return copy;
+    }
 
 	public BouncingMovement(Maze maze)
 	{
