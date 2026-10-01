@@ -2,8 +2,8 @@ public class Weapon
 {
 	public const double ProjectileSpeed = 10.0;
 
-	public string Name { get; }
-	public int Damage { get; }
+	public virtual string Name { get; }
+	public virtual int Damage { get; }
 
 	public virtual bool IsSingleUse => false;
 

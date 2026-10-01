@@ -9,8 +9,11 @@ public class Projectile
 
 	public double VelocityX { get; private set; }
 	public double VelocityY { get; private set; }
+	public bool IsPiercing { get; private set; } = false;
+	private double hitCooldown = 0;
 
-	public int Damage { get; }
+	public bool CanHit => hitCooldown <= 0;
+	public int Damage { get; private set;}
 	public int OwnerId { get; }
 
 	public string Kind { get; }
@@ -73,5 +76,21 @@ public class Projectile
 	public void Move(double deltaSeconds)
 	{
 		Movement.Move(this, deltaSeconds);
+		if (hitCooldown > 0)
+	{
+    hitCooldown -= deltaSeconds;
+	}
+	}
+	public void SetDamage(int damage)
+	{
+    Damage = damage;
+	}
+	public void SetPiercing(bool piercing)
+	{
+    IsPiercing = piercing;
+	}
+	public void StartHitCooldown()
+	{
+    hitCooldown = 0.35;
 	}
 }

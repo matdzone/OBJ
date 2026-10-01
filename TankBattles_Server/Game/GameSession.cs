@@ -40,6 +40,10 @@ public class GameSession
 		tank.EquipWeapon(weapon);
 		tank.SetAppearance(appearance);
 
+		// tank.EquipWeapon(new DamageDecorator(tank.Weapon));
+		// tank.EquipWeapon(new SpeedDecorator(tank.Weapon));
+		// tank.EquipWeapon(new PiercingDecorator(tank.Weapon));
+
 		Player player = new Player(_nextPlayerId++, name, tank);
 
 		player.Tank.PlaceOnTile(2, 2);
@@ -196,8 +200,9 @@ public class GameSession
 		for (int i = Projectiles.Count - 1; i >= 0; i--)
 		{
 			Projectile projectile = Projectiles[i];
+			bool hit = TryHit(projectile);
 
-			if (projectile.IsExpired || TryHit(projectile))
+			if (projectile.IsExpired || (TryHit(projectile) && !projectile.IsPiercing))
 			{
 				Projectiles.RemoveAt(i);
 				continue;
@@ -211,15 +216,16 @@ public class GameSession
 				continue;
 			}
 
-			if (TryHit(projectile))
+			if (TryHit(projectile) && !projectile.IsPiercing)
 				Projectiles.RemoveAt(i);
 		}
 	}
 
 	private bool TryHit(Projectile projectile)
 	{
+		if (!projectile.CanHit){return false;}
 		double hitDistance = Tank.Radius + Projectile.Radius;
-
+	
 		Player? hitPlayer = Players.FirstOrDefault(
 			player =>
 				player.ID != projectile.OwnerId &&
@@ -233,6 +239,7 @@ public class GameSession
 			return false;
 
 		hitPlayer.Tank.TakeDamage(projectile.Damage);
+		projectile.StartHitCooldown();
 
 		return true;
 	}
