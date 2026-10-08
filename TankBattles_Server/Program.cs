@@ -17,6 +17,7 @@ GameManager gameManager = GameManager.Instance;
 GameSession game = gameManager.GameSession;
 Lobby lobby = gameManager.Lobby;
 GameFacade facade = new GameFacade(gameManager);
+CommandInvoker commandInvoker = new CommandInvoker();
 app.MapGet("/api", () =>
 {
 	return "tank battles server!";
@@ -129,12 +130,39 @@ app.MapPost(
 	"/shell/{id}/{movement}",
 	(int id, string movement) =>
 	{
-		if (!game.SetShellMovement(id, movement))
+		Player? player = game.GetPlayer(id);
+
+		if (player == null || !Tank.ShellMovements.Contains(movement))
 			return Results.BadRequest(new { message = "unknown player or movement" });
 
-		return Results.Ok(new { id, movement });
+		ITankControls controls =
+			new TankControlsAdapter(game, id);
+
+		IGameCommand command =
+			new ChangeShellCommand(controls, movement);
+
+		commandInvoker.Execute(id, command);
+
+		return Results.Ok(new
+		{
+			id,
+			movement
+		});
 	});
 
+app.MapPost("/undo/{id}", (int id) =>
+{
+	if (!commandInvoker.Undo(id))
+		return Results.BadRequest(new { message = "nothing to undo" });
+
+	Player? player = game.GetPlayer(id);
+
+	return Results.Ok(new
+	{
+		message = "command undone",
+		movement = player?.Tank.ShellMovement
+	});
+});
 app.MapPost("/shoot/{id}", (int id) =>
 {
 	Projectile? projectile = game.Shoot(id);

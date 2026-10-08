@@ -179,6 +179,13 @@ document.addEventListener("keydown", async (event) => {
     if (playerId === null || !gameActive)
         return;
     const key = event.key.toLowerCase();
+    if (key === "u") {
+        event.preventDefault();
+        await fetch(`${serverUrl}/undo/${playerId}`, {
+            method: "POST"
+        });
+        return;
+    }
     if (key === "q") {
         event.preventDefault();
         await fetch(`${serverUrl}/split/${playerId}`, {
