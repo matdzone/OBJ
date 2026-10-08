@@ -206,7 +206,6 @@ public class GameSession
 				.Where(p => p.OwnerId == playerId && !p.HasSplit)
 				.ToList();
 
-			    Console.WriteLine($"Split: {mine.Count} projectile(s) for player {playerId}");
 			if (mine.Count == 0)
 				return false;
 
