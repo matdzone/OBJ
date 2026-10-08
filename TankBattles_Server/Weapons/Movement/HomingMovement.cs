@@ -4,8 +4,6 @@ public class HomingMovement : IMovementStrategy
 	private readonly Player _target;
 	private readonly StraightMovement _fallback = new();
 
-	public IMovementStrategy Clone() => this; 
-
 	public HomingMovement(Maze maze, Player target)
 	{
 		_maze = maze;

@@ -125,6 +125,15 @@ public class Tank
 		return true;
 	}
 
+	private IMovementStrategy CreateShellMovement(Maze maze)
+	{
+		return ShellMovement switch
+		{
+			"Bouncing" => new BouncingMovement(maze),
+			"Accelerating" => new AcceleratingMovement(),
+			_ => new StraightMovement()
+		};
+	}
 
 	public Projectile Shoot(int ownerId, GameSession game)
 	{
@@ -135,7 +144,7 @@ public class Tank
 			DirectionY,
 			ownerId,
 			game,
-			game.ShellMovements.Create(ShellMovement)
+			CreateShellMovement(game.Maze)
 		);
 
 		if (Weapon.IsSingleUse)
