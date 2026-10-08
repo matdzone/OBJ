@@ -6,6 +6,11 @@ public class Tank
 	public int MaxHealth { get; }
 	public const double RocketSpeed = 5.0;
 	public TankAppearance? Appearance {get; private set;}
+
+	public string ColorHex   => Appearance?.GetColorHex()   ?? "#808080";
+	public double SpriteScale=> Appearance?.GetSpriteScale()?? 1.0;
+	public string TurretStyle=> Appearance?.GetTurretStyle()?? "standard";
+	
 	public static readonly string[] ShellMovements =
 	{
 		"Straight", "Bouncing", "Accelerating"
@@ -174,5 +179,6 @@ public class Tank
 	public void SetAppearance(TankAppearance appearance)
 	{
 		Appearance = appearance;
+
 	}
 }

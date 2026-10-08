@@ -17,6 +17,10 @@ public class GameFacade
         {
             factory = new LightTankFactory();
         }
+        else if (tankType == "medium")
+        {
+            factory = new MediumTankFactory();
+        }
         else
         {
             factory = new HeavyTankFactory();

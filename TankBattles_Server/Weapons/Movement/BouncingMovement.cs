@@ -46,7 +46,7 @@ public class BouncingMovement : IMovementStrategy
 	public IMovementStrategy Clone()
 	{
 		var copy = (BouncingMovement)MemberwiseClone();
-		copy._bounces = 0;   // pieces start with full bounces
+		copy._bounces = 0;   
 		return copy;
 	}
 }

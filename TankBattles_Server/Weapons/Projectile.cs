@@ -67,10 +67,8 @@ public class Projectile
 	{
 		var copy = (Projectile)MemberwiseClone();
 		copy.Movement = Movement.Clone();
-		copy.HasSplit = true;
-		copy.CreatedAt = DateTime.UtcNow;
-		copy.MaxLifetime = TimeSpan.FromSeconds(2);
-		copy.hitCooldown = 0;   
+		
+		
 		return copy;
 	}
 
@@ -80,6 +78,10 @@ public class Projectile
 		for (int i = 0; i < count; i++)
 		{
 			var copy = Clone();
+			copy.HasSplit = true;
+			copy.CreatedAt = DateTime.UtcNow;
+			copy.MaxLifetime = TimeSpan.FromSeconds(2);
+			copy.hitCooldown = 0;   
 			double angle = spreadAngle * (i - (count - 1) / 2.0);
 			double rad = angle * Math.PI / 180.0;
 

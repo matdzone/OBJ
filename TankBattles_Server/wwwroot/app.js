@@ -246,62 +246,60 @@ function drawTank(player, position) {
     const centerX = position.x * tileSize;
     const centerY = position.y * tileSize;
     const isAlive = player.tank.isAlive;
-    const tankType = player.tank.appearance.type;
+    const scale = player.tank.spriteScale ?? 1.0;
+    // const scale = 1.0;
+    const aliveColor = player.tank.colorHex ?? "#3f8f5f";
+    const turretStyle = player.tank.turretStyle ?? "standard";
+    const deadColor = "#3b3530";
+    const deadTurret = "#5a4a3c";
+    const bodyWidth = 16 * scale;
+    const bodyHeight = 12 * scale;
+    const turretSize = 4 * scale;
+    const barrelLength = 11 * scale;
+    const barrelWidth = turretStyle === "wide" ? 4 :
+        turretStyle === "medium" ? 3 :
+            turretStyle === "slim" ? 2 : 3;
     context.save();
     context.translate(centerX, centerY);
     context.rotate(position.angle * Math.PI / 180);
-    let bodyWidth = 16;
-    let bodyHeight = 12;
-    let turretSize = 4;
-    let barrelLength = 11;
-    if (tankType === "Heavy") {
-        bodyWidth = 20;
-        bodyHeight = 16;
-        turretSize = 5;
-        barrelLength = 13;
-    }
-    else if (tankType === "Light") {
-        bodyWidth = 14;
-        bodyHeight = 10;
-        turretSize = 3;
-        barrelLength = 10;
-    }
-    // Tanko korpusas
-    context.fillStyle = isAlive ? "#3f8f5f" : "#3b3530";
+    context.fillStyle = isAlive ? aliveColor : deadColor;
     context.fillRect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
-    // Bokštelis
     context.beginPath();
     context.arc(0, 0, turretSize, 0, Math.PI * 2);
-    context.fillStyle = isAlive ? "#65b87c" : "#5a4a3c";
+    context.fillStyle = isAlive ? lighten(aliveColor) : deadTurret;
     context.fill();
-    // Vamzdis
     context.beginPath();
     context.moveTo(0, 0);
     context.lineTo(barrelLength, 0);
     context.strokeStyle = isAlive ? "#d4d4d4" : "#6b6b6b";
-    context.lineWidth = 3;
+    context.lineWidth = barrelWidth;
     context.stroke();
     context.restore();
     if (isAlive && player.tank.shield > 0) {
         context.beginPath();
-        context.arc(centerX, centerY, 12, 0, Math.PI * 2);
+        context.arc(centerX, centerY, 12 * scale, 0, Math.PI * 2);
         context.strokeStyle = "rgba(90, 160, 255, 0.8)";
         context.lineWidth = 2;
         context.stroke();
     }
-    let labelY = centerY - 14;
+    let labelY = centerY - 14 * scale;
     if (!isAlive) {
         drawSkull(centerX, centerY - 18);
         labelY = centerY - 28;
     }
-    // Savo tankui nicko viršuje nerodom,
-    // nes jis jau yra HUD'e
     if (player.id !== playerId) {
         context.fillStyle = "white";
         context.font = "12px Arial";
         context.textAlign = "center";
         context.fillText(player.name.substring(0, 10), centerX, labelY);
     }
+}
+function lighten(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = Math.min(255, ((n >> 16) & 0xff) + 40);
+    const g = Math.min(255, ((n >> 8) & 0xff) + 40);
+    const b = Math.min(255, (n & 0xff) + 40);
+    return `rgb(${r},${g},${b})`;
 }
 function drawSkull(x, y) {
     context.fillStyle = "#f2f2f2";
