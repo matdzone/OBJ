@@ -16,7 +16,7 @@ GameManager gameManager = GameManager.Instance;
 
 GameSession game = gameManager.GameSession;
 Lobby lobby = gameManager.Lobby;
-ITankFactory itank;
+GameFacade facade = new GameFacade(gameManager);
 app.MapGet("/api", () =>
 {
 	return "tank battles server!";
@@ -42,10 +42,8 @@ app.MapGet("/players", () =>
 
 app.MapPost("/join/{name}/{tankType}", (string name, string tankType) =>
 {
-	if(tankType == "light"){itank = new LightTankFactory();}
-	else {itank = new HeavyTankFactory();}
-	Player player = game.AddPlayer(name, itank);
 
+	Player player = facade.JoinGame(name, tankType);
 	lobby.AddPlayer(player);
 
 	return new
@@ -57,15 +55,8 @@ app.MapPost("/join/{name}/{tankType}", (string name, string tankType) =>
 });
 app.MapPost("/lobby/mode/{playerId}/{gameMode}", (int playerId, string gameMode) =>
 {
-	Lobby lobby = GameManager.Instance.Lobby;
-
-	if (lobby.HostId != playerId)
-		return Results.BadRequest(new { message = "Only host can change game mode" });
-
-	if (gameMode != "Deathmatch" && gameMode != "Practice")
-		return Results.BadRequest(new { message = "Unknown game mode" });
-
-	lobby.SetGameMode(gameMode);
+	if (!facade.SetGameMode(playerId, gameMode))
+		return Results.BadRequest(new { message = "Cannot change game mode" });
 
 	return Results.Ok(new
 	{
@@ -91,9 +82,8 @@ app.MapGet("/lobby", () =>
 });
 app.MapPost("/lobby/start/{playerId}", (int playerId) =>
 {
-	Lobby lobby = GameManager.Instance.Lobby;
+	bool started = facade.StartGame(playerId);
 
-	bool started = lobby.StartGame(playerId);
 
 	if (!started)
 		return Results.BadRequest(new { message = "Game cannot be started" });
@@ -123,7 +113,7 @@ app.MapPost(
 			x = player.X,
 			y = player.Y
 		});
-});
+	});
 
 app.MapPost(
 	"/input/{id}/{drive}/{turn}",
@@ -133,7 +123,7 @@ app.MapPost(
 			return Results.NotFound(new { message = "player " + id + " does not exist" });
 
 		return Results.Ok();
-});
+	});
 
 app.MapPost(
 	"/shell/{id}/{movement}",
@@ -143,7 +133,7 @@ app.MapPost(
 			return Results.BadRequest(new { message = "unknown player or movement" });
 
 		return Results.Ok(new { id, movement });
-});
+	});
 
 app.MapPost("/shoot/{id}", (int id) =>
 {
@@ -179,15 +169,11 @@ app.MapPost(
 	"/ready/{id}/{ready}",
 	(int id, bool ready) =>
 	{
-		Player? player = game.GetPlayer(id);
-
-		if (player == null)
+		if (!facade.SetPlayerReady(id, ready))
 			return Results.NotFound();
 
-		player.SetReady(ready);
-
-		return Results.Ok(player);
-});
+		return Results.Ok(game.GetPlayer(id));
+	});
 
 _ = Task.Run(async () =>
 {
