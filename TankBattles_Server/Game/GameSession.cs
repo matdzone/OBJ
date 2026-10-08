@@ -192,6 +192,34 @@ public class GameSession
 		}
 	}
 
+	public bool SplitProjectiles(int playerId, int count = 2, double spreadAngle = 20, double speedMultiplier = 1.0)
+	{
+		Player? player = GetPlayer(playerId);
+
+		if (player == null || !player.Tank.IsAlive)
+			return false;
+
+		lock (_updateLock)
+		{
+			
+			List<Projectile> mine = Projectiles
+				.Where(p => p.OwnerId == playerId && !p.HasSplit)
+				.ToList();
+
+			    Console.WriteLine($"Split: {mine.Count} projectile(s) for player {playerId}");
+			if (mine.Count == 0)
+				return false;
+
+			foreach (Projectile p in mine)
+			{
+				Projectiles.Remove(p);
+				Projectiles.AddRange(p.Split(count, spreadAngle, speedMultiplier));
+			}
+
+			return true;
+		}
+	}
+
 	private void UpdateProjectiles(double deltaSeconds)
 	{
 		for (int i = Projectiles.Count - 1; i >= 0; i--)

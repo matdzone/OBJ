@@ -43,4 +43,10 @@ public class BouncingMovement : IMovementStrategy
 	{
 		return _maze.CanMoveTo((int)Math.Floor(x), (int)Math.Floor(y));
 	}
+	public IMovementStrategy Clone()
+	{
+		var copy = (BouncingMovement)MemberwiseClone();
+		copy._bounces = 0;   // pieces start with full bounces
+		return copy;
+	}
 }

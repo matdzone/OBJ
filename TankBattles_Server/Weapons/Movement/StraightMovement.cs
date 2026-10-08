@@ -7,4 +7,5 @@ public class StraightMovement : IMovementStrategy
 			projectile.VelocityY * deltaSeconds
 		);
 	}
+	public IMovementStrategy Clone() => this; 
 }

@@ -18,9 +18,11 @@ public class Projectile
 
 	public string Kind { get; }
 
-	public DateTime CreatedAt { get; } = DateTime.UtcNow;
+	public bool HasSplit { get; set; } = false;
 
-	public TimeSpan? MaxLifetime { get; }
+	public DateTime CreatedAt { get; set;} = DateTime.UtcNow;
+
+	public TimeSpan? MaxLifetime { get; set;}
 
 	[JsonIgnore]
 	public IMovementStrategy Movement { get; set; }
@@ -60,6 +62,41 @@ public class Projectile
 		Movement = movement ?? new StraightMovement();
 		MaxLifetime = maxLifetime;
 	}
+
+	public Projectile Clone()
+	{
+		var copy = (Projectile)MemberwiseClone();
+		copy.Movement = Movement.Clone();
+		copy.HasSplit = true;
+		copy.CreatedAt = DateTime.UtcNow;
+		copy.MaxLifetime = TimeSpan.FromSeconds(2);
+		copy.hitCooldown = 0;   
+		return copy;
+	}
+
+	public List<Projectile> Split(int count, double spreadAngle, double speedMultiplier = 1.0)
+	{
+		var projectiles = new List<Projectile>();
+		for (int i = 0; i < count; i++)
+		{
+			var copy = Clone();
+			double angle = spreadAngle * (i - (count - 1) / 2.0);
+			double rad = angle * Math.PI / 180.0;
+
+			double cos = Math.Cos(rad);
+			double sin = Math.Sin(rad);
+
+			copy.SetVelocity(
+				(VelocityX * cos - VelocityY * sin) * speedMultiplier,
+				(VelocityX * sin + VelocityY * cos) * speedMultiplier
+			);
+
+
+			projectiles.Add(copy);
+		}
+		return projectiles;
+	}
+
 
 	public void SetVelocity(double velocityX, double velocityY)
 	{

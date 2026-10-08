@@ -46,5 +46,8 @@ public class HomingMovement : IMovementStrategy
 		}
 
 		_fallback.Move(projectile, deltaSeconds);
+
+		
 	}
+	public IMovementStrategy Clone() => this; 
 }

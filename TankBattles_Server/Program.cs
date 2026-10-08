@@ -150,6 +150,21 @@ app.MapPost("/shoot/{id}", (int id) =>
 	return Results.Ok(projectile);
 });
 
+app.MapPost("/split/{id}", (int id) =>
+{
+	bool projectile = game.SplitProjectiles(id, 3, 60);
+
+	if (!projectile)
+	{
+		return Results.NotFound(new
+		{
+			message = "player does not exist or doesnt have any bullets on map"
+		});
+	}
+
+	return Results.Ok(projectile);
+});
+
 app.MapGet("/projectiles", () =>
 {
 	return game.Projectiles;

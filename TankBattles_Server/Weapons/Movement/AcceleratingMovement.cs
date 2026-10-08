@@ -27,5 +27,7 @@ public class AcceleratingMovement : IMovementStrategy
 		);
 
 		_straight.Move(projectile, deltaSeconds);
+		
 	}
+	public IMovementStrategy Clone() => (IMovementStrategy)MemberwiseClone();
 }

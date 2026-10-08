@@ -344,6 +344,18 @@ document.addEventListener(
 
         const key = event.key.toLowerCase();
 
+         if (key === "q") {
+            event.preventDefault();
+
+            await fetch(
+                `${serverUrl}/split/${playerId}`,
+                {
+                    method: "POST"
+                });
+
+            return;
+        }
+
         if (key === " ") {
             event.preventDefault();
 
@@ -355,6 +367,9 @@ document.addEventListener(
 
             return;
         }
+        
+
+            
 
         const shellMovement =
             shellMovementKeys[key];
