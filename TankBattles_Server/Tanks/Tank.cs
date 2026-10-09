@@ -6,7 +6,36 @@ public class Tank
 	public int MaxHealth { get; }
 	public const double RocketSpeed = 5.0;
 	public TankAppearance? Appearance {get; private set;}
+	private TankAppearance? _realAppearance {get; set;}
 
+	public bool IsMasked => _realAppearance != null;
+	public const double MaskDuration = 4.0;
+	private double _maskTimeLeft;
+
+	public void Mask(TankAppearance disguise)
+	{
+		_realAppearance ??= Appearance;  
+		_maskTimeLeft = MaskDuration; 
+		SetAppearance(disguise);
+	}
+
+	private void Unmask()
+	{
+		if (_realAppearance == null) return;
+
+		SetAppearance(_realAppearance);
+		_realAppearance = null;
+		_maskTimeLeft = 0;
+	}
+
+	private void UpdateMask(double deltaSeconds)
+	{
+		if (_realAppearance == null) return;
+
+		_maskTimeLeft -= deltaSeconds;
+		if (_maskTimeLeft <= 0)
+			Unmask();
+	}
 	public string ColorHex   => Appearance?.GetColorHex()   ?? "#808080";
 	public double SpriteScale=> Appearance?.GetSpriteScale()?? 1.0;
 	public string TurretStyle=> Appearance?.GetTurretStyle()?? "standard";
@@ -65,6 +94,8 @@ public class Tank
 
 	public bool Update(double deltaSeconds, int drive, int turn, Maze maze)
 	{
+		UpdateMask(deltaSeconds);
+
 		Angle = ((Angle + turn * TurnSpeed * deltaSeconds) % 360 + 360) % 360;
 
 		if (drive == 0)

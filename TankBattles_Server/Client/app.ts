@@ -625,7 +625,8 @@ function drawProjectile(projectile: any, ageSeconds: number): void {
 const boxStyles: Record<string, { fill: string, stroke: string }> = {
     Rocket: { fill: "#c8913a", stroke: "#7a5520" },
     Health: { fill: "#e8e8e8", stroke: "#9a9a9a" },
-    Shield: { fill: "#3f7fd6", stroke: "#1f4b8a" }
+    Shield: { fill: "#3f7fd6", stroke: "#1f4b8a" },
+    Disguise: { fill: "#8a2be2", stroke: "#491692" }
 };
 
 
@@ -675,6 +676,23 @@ function drawBox(box: any): void {
         context.lineWidth = 1.5;
         context.stroke();
     }
+    else if (box.kind === "Disguise") {
+
+        context.beginPath();
+        context.ellipse(centerX, centerY, 7, 4, 0, 0, Math.PI * 2);
+        context.fillStyle = "#f2e9ff";
+        context.fill();
+
+        context.fillStyle = style.fill;
+
+        context.beginPath();
+        context.ellipse(centerX - 3, centerY - 0.5, 1.8, 1.2, 0, 0, Math.PI * 2);
+        context.fill();
+
+        context.beginPath();
+        context.ellipse(centerX + 3, centerY - 0.5, 1.8, 1.2, 0, 0, Math.PI * 2);
+        context.fill();
+    }       
     else {
 
         context.beginPath();

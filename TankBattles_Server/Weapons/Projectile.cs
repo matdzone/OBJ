@@ -82,6 +82,7 @@ public class Projectile
 			copy.CreatedAt = DateTime.UtcNow;
 			copy.MaxLifetime = TimeSpan.FromSeconds(2);
 			copy.hitCooldown = 0;   
+			copy.Damage = (int)(Damage * 0.1);
 			double angle = spreadAngle * (i - (count - 1) / 2.0);
 			double rad = angle * Math.PI / 180.0;
 

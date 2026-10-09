@@ -31,10 +31,11 @@ public class BoxFactory
 
 		(int X, int Y) tile = freeTiles[_random.Next(freeTiles.Count)];
 
-		return _random.Next(3) switch
+		return _random.Next(4) switch
 		{
 			0 => new RocketBox(tile.X, tile.Y),
 			1 => new HealthBox(tile.X, tile.Y),
+			2 => new DisguiseBox(tile.X, tile.Y),
 			_ => new ShieldBox(tile.X, tile.Y)
 		};
 	}
