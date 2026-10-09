@@ -36,9 +36,6 @@ public class Tank
 		if (_maskTimeLeft <= 0)
 			Unmask();
 	}
-	public string ColorHex   => Appearance?.GetColorHex()   ?? "#808080";
-	public double SpriteScale=> Appearance?.GetSpriteScale()?? 1.0;
-	public string TurretStyle=> Appearance?.GetTurretStyle()?? "standard";
 	
 	public static readonly string[] ShellMovements =
 	{
