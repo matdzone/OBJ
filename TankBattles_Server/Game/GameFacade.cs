@@ -1,13 +1,16 @@
 public class GameFacade
 {
-    private readonly GameSession game;
+     private readonly GameSession game;
     private readonly Lobby lobby;
 
-    public GameFacade(GameManager manager)
+    public GameFacade()
     {
+        GameManager manager = GameManager.Instance;
+
         game = manager.GameSession;
         lobby = manager.Lobby;
     }
+
 
     public Player JoinGame(string name, string tankType)
     {

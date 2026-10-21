@@ -16,7 +16,7 @@ GameManager gameManager = GameManager.Instance;
 
 GameSession game = gameManager.GameSession;
 Lobby lobby = gameManager.Lobby;
-GameFacade facade = new GameFacade(gameManager);
+GameFacade facade = new GameFacade();
 CommandInvoker commandInvoker = new CommandInvoker();
 app.MapGet("/api", () =>
 {
@@ -208,9 +208,7 @@ app.MapGet("/maze", () =>
 	return game.Maze;
 });
 
-app.MapPost(
-	"/ready/{id}/{ready}",
-	(int id, bool ready) =>
+app.MapPost("/ready/{id}/{ready}", (int id, bool ready) =>
 	{
 		if (!facade.SetPlayerReady(id, ready))
 			return Results.NotFound();
