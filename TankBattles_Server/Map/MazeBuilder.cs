@@ -1,53 +1,5 @@
-public class MazeBuilder
+public class MazeBuilder : MazeBuilderBase
 {
-    private int Width;
-    private int Height;
-    private HashSet<(int X, int Y)> Walls = new();
-
-    public MazeBuilder(int width = 40, int height = 20)
-    {
-        Width = width;
-        Height = height;
-    }
-
-    public MazeBuilder WithWall(int x, int y)
-    {
-        Walls.Add((x, y));
-        return this;
-    }
-
-    public MazeBuilder WithBorder()
-    {
-        for (int x = 0; x < Width; x++)
-        {
-            Walls.Add((x, 0));
-            Walls.Add((x, Height - 1));
-        }
-
-        for (int y = 1; y < Height - 1; y++)
-        {
-            Walls.Add((0, y));
-            Walls.Add((Width - 1, y));
-        }
-
-        return this;
-    }
-
-    public MazeBuilder WithHorizontalWall(int y, int fromX, int toX)
-    {
-        for (int x = fromX; x <= toX; x++)
-            Walls.Add((x, y));
-
-        return this;
-    }
-
-    public MazeBuilder WithVerticalWall(int x, int fromY, int toY)
-    {
-        for (int y = fromY; y <= toY; y++)
-            Walls.Add((x, y));
-
-        return this;
-    }
 
     public Maze Build()
     {

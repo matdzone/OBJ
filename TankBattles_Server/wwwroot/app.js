@@ -47,6 +47,10 @@ async function joinGame() {
         .getElementById("lobby")
         .classList.remove("hidden");
     await updateLobby();
+    const preview = await fetch(`${serverUrl}/maze/preview`);
+    const previewEl = document.getElementById("mapPreview");
+    if (previewEl)
+        previewEl.textContent = await preview.text();
     lobbyInterval =
         window.setInterval(updateLobby, 500);
 }

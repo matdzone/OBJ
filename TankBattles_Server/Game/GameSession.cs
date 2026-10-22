@@ -12,11 +12,14 @@ public class GameSession
 	private readonly object _boxLock = new();
 	private readonly object _updateLock = new();
 
+	private string preview;
+
 	private const int MaxBoxes = 2;
 
 	public GameSession()
 	{
-		Maze = MazeDirector.Classic();
+		Maze = MazeDirector.Classic(new MazeBuilder()).Build();
+		preview = MazeDirector.Classic(new MazeBuilderString()).Build();
 	}
 
 	public List<Box> Boxes

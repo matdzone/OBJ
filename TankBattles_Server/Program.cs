@@ -208,6 +208,9 @@ app.MapGet("/maze", () =>
 	return game.Maze;
 });
 
+app.MapGet("/maze/preview", () =>
+    MazeDirector.Classic(new MazeBuilderString()).Build());
+
 app.MapPost("/ready/{id}/{ready}", (int id, bool ready) =>
 	{
 		if (!facade.SetPlayerReady(id, ready))
