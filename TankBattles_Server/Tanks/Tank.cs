@@ -2,20 +2,22 @@ public class Tank
 {
 	public const double Radius = 0.35;
 	public double Speed { get; }
-	public  double TurnSpeed {get;}
+	public double TurnSpeed { get; }
 	public int MaxHealth { get; }
 	public const double RocketSpeed = 5.0;
-	public TankAppearance? Appearance {get; private set;}
-	private TankAppearance? _realAppearance {get; set;}
+	public TankAppearance? Appearance { get; private set; }
+	private TankAppearance? _realAppearance { get; set; }
 
 	public bool IsMasked => _realAppearance != null;
 	public const double MaskDuration = 4.0;
 	private double _maskTimeLeft;
+	public int WeaponUpgradeLevel { get; private set; } = 0;
+
 
 	public void Mask(TankAppearance disguise)
 	{
-		_realAppearance ??= Appearance;  
-		_maskTimeLeft = MaskDuration; 
+		_realAppearance ??= Appearance;
+		_maskTimeLeft = MaskDuration;
 		SetAppearance(disguise);
 	}
 
@@ -39,7 +41,7 @@ public class Tank
 	public string ColorHex => Appearance?.GetColorHex() ?? "#808080";
 	public double SpriteScale => Appearance?.GetSpriteScale() ?? 1.0;
 	public string TurretStyle => Appearance?.GetTurretStyle() ?? "standard";
-	
+
 	public static readonly string[] ShellMovements =
 	{
 		"Straight", "Bouncing", "Accelerating"
@@ -211,5 +213,28 @@ public class Tank
 	{
 		Appearance = appearance;
 
+	}
+
+	public void UpgradeWeapon()
+	{
+		switch (WeaponUpgradeLevel)
+		{
+			case 0:
+				EquipWeapon(new DamageDecorator(Weapon));
+				break;
+
+			case 1:
+				EquipWeapon(new SpeedDecorator(Weapon));
+				break;
+
+			case 2:
+				EquipWeapon(new PiercingDecorator(Weapon));
+				break;
+
+			default:
+				return;
+		}
+
+		WeaponUpgradeLevel++;
 	}
 }

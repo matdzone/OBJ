@@ -1,6 +1,6 @@
 public class GameFacade
 {
-     private readonly GameSession game;
+    private readonly GameSession game;
     private readonly Lobby lobby;
 
     public GameFacade()
