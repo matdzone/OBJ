@@ -68,7 +68,6 @@ public class Projectile
 		var copy = (Projectile)MemberwiseClone();
 		copy.Movement = Movement.Clone();
 		
-		
 		return copy;
 	}
 
