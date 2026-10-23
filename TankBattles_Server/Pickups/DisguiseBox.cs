@@ -3,7 +3,7 @@ public class DisguiseBox : Box
     private static readonly ITankFactory[] Factories =
     {
         new LightTankFactory(),
-        new MediumTankFactory(),
+        // new MediumTankFactory(),
         new HeavyTankFactory()
     };
 

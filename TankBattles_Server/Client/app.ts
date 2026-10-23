@@ -499,7 +499,7 @@ function drawTank(player: any, position: RenderPosition): void {
 
     const barrelWidth =
         turretStyle === "wide" ? 4 :
-        turretStyle === "medium" ? 3 :
+        // turretStyle === "medium" ? 3 :
         turretStyle === "slim" ? 2 : 3;
 
     context.save();

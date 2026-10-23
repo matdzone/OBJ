@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
-
+using System.Runtime.CompilerServices;
+using System;
 public class Projectile
 {
 	public const double Radius = 0.1;
@@ -62,6 +63,8 @@ public class Projectile
 		Movement = movement ?? new StraightMovement();
 		MaxLifetime = maxLifetime;
 	}
+
+	public Projectile ShallowCopy() => (Projectile)MemberwiseClone();
 
 	public Projectile Clone()
 	{

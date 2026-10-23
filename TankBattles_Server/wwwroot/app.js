@@ -261,8 +261,8 @@ function drawTank(player, position) {
     const turretSize = 4 * scale;
     const barrelLength = 11 * scale;
     const barrelWidth = turretStyle === "wide" ? 4 :
-        turretStyle === "medium" ? 3 :
-            turretStyle === "slim" ? 2 : 3;
+        // turretStyle === "medium" ? 3 :
+        turretStyle === "slim" ? 2 : 3;
     context.save();
     context.translate(centerX, centerY);
     context.rotate(position.angle * Math.PI / 180);
