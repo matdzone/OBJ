@@ -15,7 +15,6 @@ Lobby lobby = new Lobby("Main Lobby");
 GameManager gameManager = GameManager.Instance;
 
 GameSession game = gameManager.GameSession;
-Lobby lobby = gameManager.Lobby;
 GameFacade facade = new GameFacade();
 CommandInvoker commandInvoker = new CommandInvoker();
 app.MapGet("/api", () =>
@@ -45,7 +44,6 @@ app.MapPost("/join/{name}/{tankType}", (string name, string tankType) =>
 {
 
 	Player player = facade.JoinGame(name, tankType);
-	lobby.AddPlayer(player);
 
 	return new
 	{
@@ -56,13 +54,14 @@ app.MapPost("/join/{name}/{tankType}", (string name, string tankType) =>
 });
 app.MapPost("/lobby/mode/{playerId}/{gameMode}", (int playerId, string gameMode) =>
 {
+	
 	if (!facade.SetGameMode(playerId, gameMode))
 		return Results.BadRequest(new { message = "Cannot change game mode" });
 
 	return Results.Ok(new
 	{
 		message = "Game mode changed",
-		gameMode = lobby.GameMode
+		gameMode = GameManager.Instance.Lobby.GameMode
 	});
 });
 app.MapGet("/lobby", () =>
