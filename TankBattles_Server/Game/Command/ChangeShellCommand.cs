@@ -10,6 +10,8 @@ public class ChangeShellCommand : IGameCommand
 		newMovement = movement;
 	}
 
+	public string Description => $"Shell: {oldMovement} -> {newMovement}";
+
 	public void Execute()
 	{
 		oldMovement = controls.GetShellMovement();

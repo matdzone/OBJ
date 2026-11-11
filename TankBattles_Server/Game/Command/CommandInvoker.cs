@@ -12,6 +12,14 @@ public class CommandInvoker
 		history[playerId].Push(command);
 	}
 
+	public IIterator<IGameCommand> CreateHistoryIterator(int playerId)
+	{
+		if (!history.ContainsKey(playerId))
+			return new StackIterator<IGameCommand>(new Stack<IGameCommand>());
+
+		return new StackIterator<IGameCommand>(history[playerId]);
+	}
+
 	public bool Undo(int playerId)
 	{
 		if (!history.ContainsKey(playerId) || history[playerId].Count == 0)
