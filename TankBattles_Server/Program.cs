@@ -149,6 +149,22 @@ app.MapPost(
 		});
 	});
 
+app.MapGet("/history/{id}", (int id) =>
+{
+	List<string> commands = new();
+
+	IIterator<IGameCommand> iterator = commandInvoker.CreateHistoryIterator(id);
+
+	while (iterator.HasNext())
+		commands.Add(iterator.Next().Description);
+
+	return Results.Ok(new
+	{
+		id,
+		commands
+	});
+});
+
 app.MapPost("/undo/{id}", (int id) =>
 {
 	if (!commandInvoker.Undo(id))

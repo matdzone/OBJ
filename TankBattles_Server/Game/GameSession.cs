@@ -58,6 +58,11 @@ public class GameSession
 		return player;
 	}
 
+	public IIterator<Player> CreatePlayerIterator()
+	{
+		return new ListIterator<Player>(Players);
+	}
+
 	public Player? GetPlayer(int id)
 	{
 		return Players.FirstOrDefault(p => p.ID == id);
@@ -91,8 +96,10 @@ public class GameSession
 
 			_boxes.Add(box);
 
-			foreach (Player player in Players)
-				player.AddMoveObserver(box);
+			IIterator<Player> players = CreatePlayerIterator();
+
+			while (players.HasNext())
+				players.Next().AddMoveObserver(box);
 
 			return box;
 		}
@@ -105,8 +112,10 @@ public class GameSession
 			if (!_boxes.Remove(box))
 				return false;
 
-			foreach (Player player in Players)
-				player.RemoveMoveObserver(box);
+			IIterator<Player> players = CreatePlayerIterator();
+
+			while (players.HasNext())
+				players.Next().RemoveMoveObserver(box);
 
 			return true;
 		}

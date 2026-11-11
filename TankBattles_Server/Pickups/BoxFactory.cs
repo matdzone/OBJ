@@ -17,27 +17,28 @@ public class BoxFactory
 
 		List<(int X, int Y)> freeTiles = new();
 
-		for (int x = 0; x < maze.Width; x++)
+		IIterator<Position> tiles = new MazeGrid(maze).CreateIterator();
+
+		while (tiles.HasNext())
 		{
-			for (int y = 0; y < maze.Height; y++)
-			{
-				if (maze.CanMoveTo(x, y) && !occupied.Contains((x, y)))
-					freeTiles.Add((x, y));
-			}
+			Position tile = tiles.Next();
+
+			if (!occupied.Contains((tile.X, tile.Y)))
+				freeTiles.Add((tile.X, tile.Y));
 		}
 
 		if (freeTiles.Count == 0)
 			return null;
 
-		(int X, int Y) tile = freeTiles[_random.Next(freeTiles.Count)];
+		(int X, int Y) spot = freeTiles[_random.Next(freeTiles.Count)];
 
 		return _random.Next(5) switch
 		{
-			0 => new RocketBox(tile.X, tile.Y),
-			1 => new HealthBox(tile.X, tile.Y),
-			2 => new DisguiseBox(tile.X, tile.Y),
-			3 => new ShieldBox(tile.X, tile.Y),
-			_ => new WeaponUpgradeBox(tile.X, tile.Y)
+			0 => new RocketBox(spot.X, spot.Y),
+			1 => new HealthBox(spot.X, spot.Y),
+			2 => new DisguiseBox(spot.X, spot.Y),
+			3 => new ShieldBox(spot.X, spot.Y),
+			_ => new WeaponUpgradeBox(spot.X, spot.Y)
 		};
 	}
 }
