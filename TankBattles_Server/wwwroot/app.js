@@ -339,7 +339,8 @@ const boxStyles = {
     Rocket: { fill: "#c8913a", stroke: "#7a5520" },
     Health: { fill: "#e8e8e8", stroke: "#9a9a9a" },
     Shield: { fill: "#3f7fd6", stroke: "#1f4b8a" },
-    Disguise: { fill: "#8a2be2", stroke: "#491692" }
+    Disguise: { fill: "#8a2be2", stroke: "#491692" },
+    WeaponUpgrade: { fill: "#e0a800", stroke: "#805c00" }
 };
 function drawBox(box) {
     const x = box.position.x * tileSize;
@@ -376,6 +377,13 @@ function drawBox(box) {
         context.beginPath();
         context.ellipse(centerX + 3, centerY - 0.5, 1.8, 1.2, 0, 0, Math.PI * 2);
         context.fill();
+    }
+    else if (box.kind === "WeaponUpgrade") {
+        context.fillStyle = "#ffffff";
+        context.font = "bold 14px Arial";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText("+", centerX, centerY);
     }
     else {
         context.beginPath();

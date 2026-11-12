@@ -1,7 +1,6 @@
 public abstract class Box : IPlayerMoveObserver
 {
 	public Position Position { get; }
-
 	public abstract string Kind { get; }
 
 	protected Box(int x, int y)
@@ -11,12 +10,13 @@ public abstract class Box : IPlayerMoveObserver
 
 	public void OnPlayerMoved(Player player)
 	{
-		if (player.X != Position.X || player.Y != Position.Y)
-		{
-			return;
-		}
+		if (player.X == Position.X && player.Y == Position.Y)
+			Collect(player.Tank);
+	}
 
-		if (!CanApply(player.Tank))
+	public void Collect(Tank tank)
+	{
+		if (!CanApply(tank))
 			return;
 
 		GameSession game = GameManager.Instance.GameSession;
@@ -24,10 +24,9 @@ public abstract class Box : IPlayerMoveObserver
 		if (!game.RemoveBox(this))
 			return;
 
-		Apply(player.Tank);
+		Apply(tank);
 	}
 
 	protected abstract bool CanApply(Tank tank);
-
 	protected abstract void Apply(Tank tank);
 }

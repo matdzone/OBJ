@@ -1,4 +1,4 @@
-public class ShieldBox : Box
+public sealed class ShieldBox : Box
 {
 	public const int ShieldAmount = 50;
 

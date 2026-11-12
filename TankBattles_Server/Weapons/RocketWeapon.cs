@@ -1,4 +1,4 @@
-public class RocketWeapon : Weapon
+public sealed class RocketWeapon : Weapon
 {
 	private static readonly TimeSpan MaxFlightTime =
 		TimeSpan.FromSeconds(5);
@@ -12,35 +12,37 @@ public class RocketWeapon : Weapon
 	{
 	}
 
-	public override Projectile Shoot(
+	protected override IMovementStrategy GetMovement(
+		int ownerId,
 		double x,
 		double y,
-		double directionX,
-		double directionY,
-		int ownerId,
 		GameSession game,
 		IMovementStrategy shellMovement)
 	{
 		Player? target = game.FindNearestEnemy(
 			ownerId,
-			new Position((int)Math.Floor(x), (int)Math.Floor(y))
+			new Position(
+				(int)Math.Floor(x),
+				(int)Math.Floor(y))
 		);
 
-		IMovementStrategy movement =
-			target == null
-				? new StraightMovement()
-				: new HomingMovement(game.Maze, target);
+		return target == null
+			? new StraightMovement()
+			: new HomingMovement(game.Maze, target);
+	}
 
-		return new Projectile(
-			x,
-			y,
-			directionX * RocketSpeed,
-			directionY * RocketSpeed,
-			Damage,
-			ownerId,
-			"Rocket",
-			movement,
-			MaxFlightTime
-		);
+	protected override double GetProjectileSpeed()
+	{
+		return RocketSpeed;
+	}
+
+	protected override string GetProjectileKind()
+	{
+		return "Rocket";
+	}
+
+	protected override TimeSpan? GetMaxLifetime()
+	{
+		return MaxFlightTime;
 	}
 }
