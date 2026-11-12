@@ -22,17 +22,66 @@ public class Weapon
 		GameSession game,
 		IMovementStrategy shellMovement)
 	{
-		return new Projectile(
+		return CreateProjectile(
 			x,
 			y,
-			directionX * ProjectileSpeed,
-			directionY * ProjectileSpeed,
-			Damage,
+			directionX,
+			directionY,
 			ownerId,
-			"Shell",
+			game,
 			shellMovement
 		);
 	}
 
-	
+	protected Projectile CreateProjectile(
+		double x,
+		double y,
+		double directionX,
+		double directionY,
+		int ownerId,
+		GameSession game,
+		IMovementStrategy shellMovement)
+	{
+		IMovementStrategy movement =
+			GetMovement(ownerId, x, y, game, shellMovement);
+
+		double speed = GetProjectileSpeed();
+
+		return new Projectile(
+			x,
+			y,
+			directionX * speed,
+			directionY * speed,
+			Damage,
+			ownerId,
+			GetProjectileKind(),
+			movement,
+			GetMaxLifetime()
+		);
+	}
+
+	protected virtual IMovementStrategy GetMovement(
+		int ownerId,
+		double x,
+		double y,
+		GameSession game,
+		IMovementStrategy shellMovement)
+	{
+		return shellMovement;
+	}
+
+	protected virtual double GetProjectileSpeed()
+	{
+		return ProjectileSpeed;
+	}
+
+	protected virtual string GetProjectileKind()
+	{
+		return "Shell";
+	}
+
+	protected virtual TimeSpan? GetMaxLifetime()
+	{
+		return null;
+	}
 }

@@ -1,4 +1,4 @@
-public class RocketBox : Box
+public sealed class RocketBox : Box
 {
 	public override string Kind => "Rocket";
 

@@ -1,4 +1,4 @@
-public class DisguiseBox : Box
+public sealed class DisguiseBox : Box
 {
     private static readonly ITankFactory[] Factories =
     {

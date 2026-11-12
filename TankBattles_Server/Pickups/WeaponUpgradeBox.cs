@@ -1,4 +1,4 @@
-public class WeaponUpgradeBox : Box
+public sealed class WeaponUpgradeBox : Box
 {
     public override string Kind => "WeaponUpgrade";
 

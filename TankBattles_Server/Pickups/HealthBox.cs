@@ -1,4 +1,4 @@
-public class HealthBox : Box
+public sealed class HealthBox : Box
 {
 	public const int HealAmount = 50;
 
