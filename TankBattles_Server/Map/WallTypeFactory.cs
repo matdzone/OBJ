@@ -1,3 +1,4 @@
+
 public class WallTypeFactory
 {
     private readonly Dictionary<string, WallType> _types = new();
@@ -6,7 +7,10 @@ public class WallTypeFactory
     {
         if (!_types.TryGetValue(name, out WallType? wallType))
         {
-            wallType = new WallType(name, isWalkable);
+            // Sukuriame 1 MiB tekstūros duomenų
+            byte[] textureData = new byte[1024 * 1024];
+
+            wallType = new WallType(name, isWalkable, textureData);
             _types.Add(name, wallType);
         }
 
