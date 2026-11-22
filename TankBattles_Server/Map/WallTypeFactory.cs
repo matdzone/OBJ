@@ -7,8 +7,8 @@ public class WallTypeFactory
     {
         if (!_types.TryGetValue(name, out WallType? wallType))
         {
-            // Sukuriame 1 MiB tekstūros duomenų
-            byte[] textureData = new byte[1024 * 1024];
+            // Sukuriame 1 MiB tekstūros duomenų 1024 * 1024
+            byte[] textureData = new byte[4*4];
 
             wallType = new WallType(name, isWalkable, textureData);
             _types.Add(name, wallType);
