@@ -280,4 +280,14 @@ public class GameSession
 
 		return true;
 	}
+	public void ExecuteAdminAction(Action action)
+{
+    lock (_updateLock)
+    {
+        lock (_boxLock)
+        {
+            action();
+        }
+    }
+}
 }

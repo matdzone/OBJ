@@ -264,4 +264,7 @@ _ = Task.Run(async () =>
 	}
 });
 
+ConsoleInterpreter interpreter = new ConsoleInterpreter(game);
+
+_ = Task.Run(() => interpreter.Run());
 app.Run();
