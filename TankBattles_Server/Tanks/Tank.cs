@@ -1,4 +1,4 @@
-public class Tank
+public class Tank : IVisitable
 {
 	public const double Radius = 0.35;
 	public double Speed { get; }
@@ -7,11 +7,15 @@ public class Tank
 	public const double RocketSpeed = 5.0;
 	public TankAppearance? Appearance { get; private set; }
 	private TankAppearance? _realAppearance { get; set; }
+	public void Accept(IGameVisitor visitor) => visitor.Visit(this);
 
 	public bool IsMasked => _realAppearance != null;
 	public const double MaskDuration = 4.0;
 	private double _maskTimeLeft;
 	public int WeaponUpgradeLevel { get; private set; } = 0;
+
+	private TankState _state = new ActiveState();
+	internal void TransitionTo(TankState state) => _state = state;
 
 
 	public void Mask(TankAppearance disguise)
@@ -97,13 +101,15 @@ public class Tank
 	public bool Update(double deltaSeconds, int drive, int turn, Maze maze)
 	{
 		UpdateMask(deltaSeconds);
+		_state.Update(this, deltaSeconds);
+		if (_state.SpeedMultiplier == 0) return false;
 
 		Angle = ((Angle + turn * TurnSpeed * deltaSeconds) % 360 + 360) % 360;
 
 		if (drive == 0)
 			return false;
 
-		double distance = drive * Speed * deltaSeconds;
+		double distance = drive * Speed * _state.SpeedMultiplier * deltaSeconds;
 
 		double newX = X + DirectionX * distance;
 		double newY = Y + DirectionY * distance;
@@ -175,6 +181,8 @@ public class Tank
 
 	public Projectile Shoot(int ownerId, GameSession game)
 	{
+		if (!_state.CanShoot) return null;
+		
 		Projectile projectile = Weapon.Shoot(
 			X,
 			Y,
@@ -191,24 +199,24 @@ public class Tank
 		return projectile;
 	}
 
-	public void Heal(int amount)
-	{
-		Health = Math.Min(MaxHealth, Health + amount);
-	}
+	public void Heal(int amount) => _state.Heal(this, amount);
 
 	public void AddShield(int amount)
 	{
 		Shield += amount;
 	}
 
-	public void TakeDamage(int damage)
+	public void TakeDamage(int damage) => _state.TakeDamage(this, damage);
+	internal void ApplyDamage(int damage)
 	{
 		int absorbed = Math.Min(Shield, damage);
-
 		Shield -= absorbed;
-
 		Health = Math.Max(0, Health - (damage - absorbed));
 	}
+
+	internal void ApplyHeal(int amount) => Health = Math.Min(MaxHealth, Health + amount);
+
+	internal void RestoreHealth() => Health = MaxHealth;
 	public void SetAppearance(TankAppearance appearance)
 	{
 		Appearance = appearance;

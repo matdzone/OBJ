@@ -11,6 +11,7 @@ public class GameSession
 	private readonly BoxFactory _boxFactory = new();
 	private readonly object _boxLock = new();
 	private readonly object _updateLock = new();
+	private readonly HealingZone _healingZone;
 
 
 	private const int MaxBoxes = 2;
@@ -18,6 +19,7 @@ public class GameSession
 	public GameSession()
 	{
 		Maze = MazeDirector.Classic(new MazeBuilder()).Build();
+		_healingZone = new HealingZone(Maze);
 	}
 
 	public List<Box> Boxes
@@ -170,6 +172,7 @@ public class GameSession
 		{
 			UpdateTanks(deltaSeconds);
 			UpdateProjectiles(deltaSeconds);
+			_healingZone.Update(deltaSeconds, Players);
 		}
 	}
 
@@ -177,8 +180,8 @@ public class GameSession
 	{
 		foreach (Player player in Players.ToList())
 		{
-			if (!player.Tank.IsAlive)
-				continue;
+			// if (!player.Tank.IsAlive)
+			// 	continue;
 
 			player.Update(deltaSeconds, Maze);
 		}
@@ -196,7 +199,7 @@ public class GameSession
 			Projectile projectile =
 				player.Tank.Shoot(player.ID, this);
 
-			Projectiles.Add(projectile);
+			if (projectile != null) Projectiles.Add(projectile);
 
 			return projectile;
 		}
