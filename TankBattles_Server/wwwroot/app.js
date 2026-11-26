@@ -423,6 +423,22 @@ async function updateGame() {
                 : `${me.tank.health}`;
     }
 }
+const healingZoneRadius = 2.5;
+function drawHealingZone() {
+    if (!maze)
+        return;
+    const centerX = (maze.width / 2) * tileSize;
+    const centerY = (maze.height / 2) * tileSize;
+    context.save();
+    context.beginPath();
+    context.arc(centerX, centerY, healingZoneRadius * tileSize, 0, Math.PI * 2);
+    context.fillStyle = "rgba(0, 200, 0, 0.25)";
+    context.fill();
+    context.strokeStyle = "rgba(0, 220, 0, 0.8)";
+    context.lineWidth = 2;
+    context.stroke();
+    context.restore();
+}
 function updateRenderPosition(player, deltaSeconds) {
     const tank = player.tank;
     let position = renderPositions.get(player.id);
@@ -444,6 +460,7 @@ function render(time) {
     if (playerId !== null && gameActive) {
         context.clearRect(0, 0, canvas.width, canvas.height);
         drawMaze();
+        drawHealingZone();
         for (const box of boxes) {
             drawBox(box);
         }
